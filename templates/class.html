@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>{{classroom.nickname}}</h2>
+    <p>Class: {{ classroom.class_no }}</p>
+    <p>Faculty: {{ faculty.name }} | Email: {{ faculty.email }}</p>
+    <br>
+    <br>
+    <div class="card">
+        <h3>Quizzes</h3>
+        {% if quizzes %}
+            <div class="card-list">
+                {% for quiz in quizzes %}
+                    <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
+                        <div class="btn-text">{{ quiz.title }}</div>
+                        <div class="btn-subtext">Class No: {{ quiz.class_no }}</div>
+                        <div class="btn-subtext">({{ quiz.status }})</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No quizzes available for this class yet.</p>
+        {% endif %}
+    </div>
+
+    {% if current.role == 'faculty' %}
+    <div class="card">
+        <h3>Enrolled Students</h3>
+        {% if students %}
+            <ul class="card-list">
+                {% for student in students %}
+                    <li class="card-item">
+                                                <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px;">
+                                                    <div>
+                                                        {{ student.name }} ({{ student.reg_no }}) - {{ student.email }}
+                                                    </div>
+                                                    <form method="POST" action="{{ url_for('remove_student_from_class') }}" style="margin:0;">
+                                                        <input type="hidden" name="class_no" value="{{ classroom.class_no }}">
+                                                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                                                        <button type="submit" class="btn" style="margin: 0; padding: 10px 14px; background: linear-gradient(135deg, #b36b00, #8a5a00);">Remove</button>
+                                                    </form>
+                                                </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No students enrolled in this class yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+        {% if current.role == 'student' %}
+        <div class="card" style="margin-top: 24px; padding: 28px; border: 2px solid rgba(179, 107, 0, 0.25);">
+            <h3 style="color:#b36b00;">Leave Class</h3>
+            <p>If you joined by mistake, you can leave this class. This will also remove your quiz attempts for quizzes in this class.</p>
+            <form method="POST" action="{{ url_for('leave_class') }}" style="margin-top: 12px;">
+                <input type="hidden" name="class_no" value="{{ classroom.class_no }}">
+                <button class="btn" type="submit" style="background: linear-gradient(135deg, #b36b00, #8a5a00);">Leave Class</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if current.role == 'faculty' %}
+        <div class="card" style="margin-top: 24px; padding: 28px; border: 2px solid rgba(176, 0, 32, 0.25);">
+            <h3 style="color:#b00020;">Delete Class</h3>
+            <p>This will delete the class, its quizzes, quiz attempts, and enrollments.</p>
+            <form method="POST" action="{{ url_for('delete_class') }}" style="margin-top: 12px;">
+                <input type="hidden" name="class_no" value="{{ classroom.class_no }}">
+                <button class="btn" type="submit" style="background: linear-gradient(135deg, #b00020, #7f0a1c);">Delete Class</button>
+            </form>
+        </div>
+        {% endif %}
+
+</div>
+{% endblock %}

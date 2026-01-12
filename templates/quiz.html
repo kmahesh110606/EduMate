@@ -1,0 +1,193 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div>
+  <h2>Quiz - {{ quiz.title }}</h2>
+  <p>{{ quiz.class_no }}</p>
+
+  {# Notifications are shown via global toast in layout.html #}
+  
+  {% if session["role"] == "faculty" %}
+  <form method="POST" action="{{ url_for('quiz_page', quiz_id=quiz.quiz_id) }}">
+      <input type="hidden" name="action" value="toggle_status">
+      <h3>Quiz - {{ quiz.title }}</h3>
+      <p><strong>Description:</strong> {{ quiz.description }}</p>
+      <p><strong>Total Questions:</strong> {{ quiz.total_questions }}</p>
+      <p><strong>Created On:</strong> {{ quiz.created_at }}</p>
+      {% if quiz.status == "archive" %}
+        <button class="btn" type="submit" disabled style="opacity:0.6; cursor:not-allowed;">Archived</button>
+      {% elif quiz.status == "draft" or quiz.status == "stopped" %}
+        <button class="btn" type="submit">Start Quiz</button>
+      {% elif quiz.status == "active" or quiz.status == "live" %}
+        <button class="btn" type="submit">Stop Quiz</button>
+      {% endif %}
+  </form>
+
+  <form method="POST" action="{{ url_for('quiz_page', quiz_id=quiz.quiz_id) }}" style="margin-top: 10px;">
+    <input type="hidden" name="action" value="toggle_archive">
+    {% if quiz.status == "archive" %}
+      <button class="btn" type="submit" style="background: linear-gradient(135deg, #2563eb, #1e40af);">Unarchive Quiz</button>
+    {% else %}
+      <button class="btn" type="submit" style="background: linear-gradient(135deg, #2563eb, #1e40af);">Archive Quiz</button>
+    {% endif %}
+  </form>
+
+  <form method="POST" action="{{ url_for('delete_quiz') }}" style="margin-top: 10px;">
+    <input type="hidden" name="quiz_id" value="{{ quiz.quiz_id }}">
+    <button class="btn" type="submit" style="background: linear-gradient(135deg, #b00020, #7f0a1c);">Delete Quiz</button>
+  </form>
+  <br>
+  <div class="card" style="margin: 0; padding: 28px;">
+      <h3>Questions</h3>
+      {% if questions %}
+        <div class="card-list" style="min-width: none;">
+          {% for question in questions %}
+            <div class="card-item" style="min-width: -webkit-fill-available;">
+              <p><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+              <p>Correct Marks: {{ question['marks'] }}</p>
+              <p>Wrong Marks: {{ question['minus'] }}</p>
+              <p>Options:</p> 
+              <ul style="list-style-type: none; padding-left: 0;">
+                <li>A: {{question['a'] }}</li>
+                <li>B: {{question['b'] }}</li>
+                <li>C: {{question['c'] }}</li>
+                <li>D: {{question['d'] }}</li>
+              </ul>
+              <p style="color: green;">Answer: {{ question['answer'] }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No questions added yet.</p>
+      {% endif %}
+  </div>
+  <br>
+  <div class="card" style="margin: 0; padding: 28px;">
+    <h3>Submissions</h3>
+    {% if scores %}
+      <table style="min-width: 100%; table-layout: fixed;"> 
+        <tr>
+          <th>Reg. No.</th>
+          <th>Name</th>
+          <th>Score</th>
+          <th>Submitted At</th>
+          <th>Answers</th>
+        </tr>
+        {% for score in scores %}
+          <tr class="card-item" style="min-width: -webkit-fill-available;">
+            <td>{{ score.reg_no }}</td>
+            <td>{{ score.name }}</td>
+            <td>{{ score.score }} / {{ quiz.total_marks }}</td>
+            <td>{{ score.submitted_at }}</td>
+            <td><details><summary>View Answers</summary>{{ score.answers }}</details></td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No submissions yet.</p>
+    {% endif %}
+  </div>
+
+  {% elif session["role"] == "student" %}
+    {% if attempt %}
+      <h3>Quiz - {{ quiz.title }} | Your Attempt</h3>
+      <p><strong>Score:</strong> {{ attempt['score'] }} / {{ quiz.total_marks }}</p>
+      <p><strong>Submitted At:</strong> {{ attempt['submitted_at'] }}</p>
+      <br>
+      <div class="card" style="margin: 0; padding: 28px;">
+        <h3>Your Answers</h3>
+        <ul style="list-style-type: none; padding-left: 0;">
+          {% for question in questions %}
+            <li>
+              <p><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+              <p>Your Answer: 
+                {% set your_answer = attempt_answers[loop.index0] if attempt_answers and attempt_answers|length > loop.index0 else '' %}
+                {{ your_answer }}: 
+                {% if your_answer == 'A' %}
+                  {{ question['a'] }}
+                {% elif your_answer == 'B' %}
+                  {{ question['b'] }}
+                {% elif your_answer == 'C' %}
+                  {{ question['c'] }}
+                {% elif your_answer == 'D' %}
+                  {{ question['d'] }}
+                {% else %}
+                  Not Answered
+                {% endif %}
+              </p>
+              <p style="color: green;">Correct Answer: {{ question['answer'] }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% else %}
+      <h3>Quiz - {{ quiz.title }} | Take the Quiz</h3>
+      {% if quiz.status != "live" %}
+        <p>The quiz is not currently active. Please wait for the faculty to start the quiz.</p>
+      {% else %}
+      <div id="startScreen" class="card" style="margin: 0; padding: 28px;">
+        <h3>Before you start</h3>
+        <p><strong>Warnings against malpractice:</strong></p>
+        <ul style="margin-top: 8px;">
+          <li>Do not switch tabs/windows or exit fullscreen.</li>
+          <li>Do not use copy/paste, PrintScreen, or developer tools.</li>
+          <li>Leaving the page may auto-submit your quiz.</li>
+          <li>Your answers are auto-saved locally to prevent data loss.</li>
+        </ul>
+        <p style="margin-top: 12px;">Click Start to begin. Timer starts immediately.</p>
+        <button id="startQuizBtn" class="btn" type="button">Start Quiz</button>
+      </div>
+
+      <div id="quizAttemptUI" style="display:none;">
+        <div class="card" style="margin: 18px 0 0 0; padding: 18px 28px;">
+          <div id="timer" data-duration="{{ quiz.duration }}" style="font-weight: 700;"></div>
+          <div id="progressText" style="margin-top: 6px; color: #444;"></div>
+          <div id="saveStatus" style="margin-top: 6px; color: #444;"></div>
+        </div>
+
+        <form id="quizForm" method="POST" action="{{ url_for('quiz_page', quiz_id=quiz.quiz_id) }}" data-quiz-id="{{ quiz.quiz_id }}">
+          <input type="hidden" name="auto_submit_reason" id="autoSubmitReason" value="">
+          <div class="card" style="margin: 0; padding: 28px;">
+            {% for question in questions %}
+              <div class="question-block" data-qindex="{{ loop.index0 }}" style="display:none;">
+                <div class="card-item" style="min-width: -webkit-fill-available; margin-bottom: 10px;">
+                  <p><strong>Question</strong></p>
+                  <p style="margin-top: 8px;"><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+                  <input type="hidden" name="question_{{ loop.index0 }}" value="{{ question.get('ques_id', loop.index0) }}">
+
+                  <div class="options" data-qindex="{{ loop.index0 }}" style="margin-top: 10px;">
+                    <div class="option-row" data-option="A">
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="A" required> A: {{ question['a'] }}</label>
+                    </div>
+                    <div class="option-row" data-option="B">
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="B"> B: {{ question['b'] }}</label>
+                    </div>
+                    <div class="option-row" data-option="C">
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="C"> C: {{ question['c'] }}</label>
+                    </div>
+                    <div class="option-row" data-option="D">
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="D"> D: {{ question['d'] }}</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div style="display:flex; gap: 10px; margin-top: 12px;">
+            <button id="prevBtn" class="btn" type="button">Previous</button>
+            <button id="nextBtn" class="btn" type="button">Next</button>
+            <button id="submitBtn" class="btn" type="submit" style="margin-left:auto;">Submit Quiz</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+</div>
+
+{% if session["role"] == "student" %}
+  <script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endif %}
+
+{% endblock %}

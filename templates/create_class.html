@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}Create Quiz{% endblock %}
+{% block content %}
+<div class="card">
+  <h2> Create a New Quiz</h2>
+
+  <form method="post" enctype="multipart/form-data" class="quiz-form">
+    <label class="form-label" for="title">
+       Class Name/Nickname
+    </label>
+    <input type="text" id="title" name="title" required>
+
+    <label class="form-label" for="class_no">
+       Class Number
+    </label>
+    <p>DISCLAIMER: You won't be able to change this later.</p>
+    <input type="text" id="class_no" name="class_no" required>
+
+    <label class="form-label" for="course_code">
+         Course Code
+    </label>
+    <input type="text" id="course_code" name="course_code" required>
+    <button type="submit" class="btn">
+      Create Class
+    </button>
+  </form>
+</div>
+{% endblock %}

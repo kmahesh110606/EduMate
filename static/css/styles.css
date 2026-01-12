@@ -1,0 +1,834 @@
+/* ======================================================
+   ROOT VARIABLES — GLASS UI SYSTEM
+====================================================== */
+:root {
+  --bg-gradient: radial-gradient(1200px at top left, #fd9793 0%, #feecb4 40%, #f3ce8f 100%);
+
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-soft: rgba(255, 255, 255, 0.35);
+  --glass-strong: rgba(255, 255, 255, 0.8);
+
+  --blur-soft: blur(14px);
+  --blur-medium: blur(18px);
+  --blur-strong: blur(24px);
+
+  --primary: #f79000;
+  --primary-glow: rgba(255, 206, 70, 0.45);
+
+  --text-dark: #0e0f11;
+  --text-muted: #80776b;
+
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+
+  --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.12);
+  --shadow-strong: 0 22px 55px rgba(0,0,0,0.25);
+}
+
+/* ======================================================
+   RESET
+====================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ======================================================
+   BODY
+====================================================== */
+body {
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-dark);
+  min-height: 100vh;
+  line-height: 1.65;
+  letter-spacing: 0.2px;
+  padding: 0px;
+}
+
+/* ======================================================
+   CONTAINER
+====================================================== */
+.container {
+  max-width: 1080px;
+  margin: 96px auto;
+  padding: 36px;
+}
+
+/* ======================================================
+   GLASS CARD
+====================================================== */
+.card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(244, 244, 244, 0.4)
+  );
+  margin: 24px;
+  backdrop-filter: var(--blur-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 28px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: var(--blur-medium);
+}
+
+.card-list {
+  display: grid;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.card-item {
+  background: rgba(255, 255, 255, 0.32);
+  padding: 16px 28px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  max-width: fit-content;
+  backdrop-filter: var(--blur-soft);
+  min-width: 280px;
+  transition: 0.2s ease all;
+}
+
+.card-item:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-soft);
+   
+  cursor: pointer;
+}
+
+
+
+
+/* ======================================================
+   HEADINGS
+====================================================== */
+h1, h2, h3 {
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.35rem; }
+
+
+/* ======================================================
+   INPUTS — ROUNDED + UNDERLINE GLASS
+====================================================== */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 18px 16px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(12px);
+  border: none;
+  border-radius: var(--radius-md);
+  border-bottom: 2px solid rgba(0,0,0,0.18);
+  font-size: 16px;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+  margin: 4px;
+}
+
+/* Quiz/Forms: don't apply full-width styling to radio/checkbox */
+input[type="radio"],
+input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  margin: 0 10px 0 0;
+  border-radius: 999px;
+  border-bottom: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  background: transparent;
+  appearance: auto;
+  -webkit-appearance: auto;
+  accent-color: var(--primary);
+}
+
+label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+}
+
+/* Quiz: avoid hover zoom breaking option clicks */
+.question-block .card-item:hover {
+  transform: none;
+}
+
+/* Quiz: ensure question/choices are visible and full width */
+.question-block .card-item {
+  width: 100%;
+  max-width: none;
+}
+
+.question-block .option-row {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.22);
+  margin-top: 10px;
+}
+
+.question-block .option-row:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(0,0,0,0.45);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  background: rgba(255,255,255,0.35);
+  border-bottom-color: var(--primary);
+  box-shadow: 0 12px 35px rgba(79,70,229,0.25);
+}
+
+/* ======================================================
+   BUTTONS — GLOSSY GLASS
+====================================================== */
+button,
+.btn {
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: #fff;
+  padding: 18px 40px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 18px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+button:hover,
+.btn:hover {
+  transform: scale(1.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 22px 55px var(--primary-glow);
+}
+
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280, #374151);
+}
+
+.btn-text {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.btn-subtext {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ======================================================
+   LINKS
+====================================================== */
+a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ======================================================
+   NAVBAR (DESKTOP)
+====================================================== */
+.navbar {
+  position: sticky;
+  top: 24px;
+  margin: 12px;
+  z-index: 1000;
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur-medium);
+  box-shadow: var(--shadow-soft);
+  padding: 24px 36px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 16px;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+/* ======================================================
+   NAV SEARCH
+====================================================== */
+.nav-search {
+  position: relative;
+  min-width: 190px;
+  max-width: 300px;
+  flex: 0 1 280px;
+}
+
+.nav-search-input {
+  width: clamp(190px, 22vw, 260px);
+  max-width: 260px;
+  padding: 14px 14px;
+  margin: auto;
+}
+
+.nav-search-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  display: none;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  z-index: 3500;
+}
+
+.nav-search-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.nav-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 3px solid rgba(0, 0, 0, 0.12);
+  border-top-color: rgba(0, 0, 0, 0.55);
+  animation: navSpin 0.85s linear infinite;
+}
+
+@keyframes navSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.nav-search-dropdown.show {
+  display: block;
+  backdrop-filter: blur(12px);
+}
+
+.nav-search-item {
+  display: block;
+  padding: 12px 14px;
+  color: var(--text-dark);
+  text-decoration: none;
+  backdrop-filter: var(--blur-medium);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  transition: background 0.25s ease, transform 0.25s ease-in;
+}
+
+.nav-search-item:last-child {
+  border-bottom: none;
+}
+
+.nav-search-item:hover {
+  background: rgba(255, 255, 255, 0.55);
+  transform: scale(1.05);
+}
+
+.nav-search-title {
+  font-weight: 800;
+}
+
+.nav-search-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 28px;
+}
+
+/* Tablet-ish widths: reduce crowding in top navbar */
+@media (max-width: 1120px) {
+  .nav-links {
+    gap: 18px;
+  }
+
+  .nav-links li a:hover {
+    transform: scale(1.12);
+  }
+}
+
+.nav-links li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  color: var(--text-black);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.nav-links li a:hover {
+  transform:scale(1.25);
+}
+
+.nav-links li.active a {
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* ======================================================
+   SVG ICON CONTROL
+====================================================== */
+.nav-links svg,
+.bottom-nav svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor !important;
+}
+
+/* ======================================================
+   POPUPS — FLOATING GLASS
+====================================================== */
+#toast-container {
+  position: fixed;
+  top: 92px; /* roughly below navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 720px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  z-index: 5000;
+  pointer-events: none;
+}
+
+.toast,
+.popup {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-weight: 800;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 18px 50px rgba(37, 99, 235, 0.35);
+  animation: toastLife 3s ease forwards;
+}
+
+@keyframes toastLife {
+  0% { opacity: 0; transform: translateY(-8px); }
+  12% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+.toast-success,
+.popup.success { background: #1b5e20; }
+
+.toast-error,
+.popup.error { background: #b00020; }
+
+.toast-warning,
+.popup.warning { background: #b36b00; }
+
+.toast-info {
+  background: #2563eb;
+}
+
+/* ======================================================
+   BOTTOM NAV (MOBILE)
+====================================================== */
+/* Bottom nav item layout */
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;        /* icon above text */
+  align-items: center;           /* horizontal center */
+  justify-content: center;       /* vertical center */
+  gap: 4px;                      /* space between icon & text */
+  text-align: center;
+  font-size: 14px;
+  min-width: 64px;               /* keeps spacing even */
+}
+
+/* Ensure inner spans don’t break alignment */
+.bottom-nav a > span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav a span {
+  color: black;
+}
+
+/* Icon size consistency */
+.bottom-nav svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/* Label styling */
+.bottom-nav span b {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+  margin-top: 2px;
+  color: var(--text-dark);
+}
+.bottom-nav {
+  position: fixed;
+  bottom: 12px;
+  min-width: -webkit-fill-available;
+  max-width: -webkit-fill-available;
+  max-height: 82px;
+  min-height: 82px;
+  margin: 12px;
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur-medium);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 0;
+  z-index: 2000;
+  color: black;
+}
+
+/* ======================================================
+   MODAL
+====================================================== */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+}
+
+.modal-content {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.9),
+    rgba(255,255,255,0.6)
+  );
+  border-radius: var(--radius-lg);
+  padding: 44px;
+  box-shadow: var(--shadow-strong);
+  animation: pop 0.35s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* ======================================================
+   RESPONSIVE
+====================================================== */
+@media (min-width: 901px) {
+  .bottom-nav { display: none; }
+}
+
+@media (max-width: 900px) {
+  .navbar { display: none; }
+
+  .container {
+    margin: 28px auto 120px;
+    padding: 22px;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+}
+
+@media (max-width: 900px) {
+
+  /* Keep header visible */
+  .navbar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    padding: 36px 26px;
+    border-radius: var(--radius-lg);
+    z-index: 3000;
+  }
+
+  /* Adjust brand size */
+  .nav-brand {
+    font-size: 1.2rem;
+    gap: 8px;
+  }
+
+  .nav-search {
+    min-width: 0;
+    max-width: none;
+    flex: 1;
+  }
+
+  .nav-search-input {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Hide desktop links only */
+  .nav-links {
+    display: none;
+  }
+
+  /* Push content below header */
+  .container {
+    margin-top: 80px;
+    margin-bottom: 120px;
+  }
+}
+
+
+/* ===============================
+   Pill Toggle (Email / Reg No)
+   =============================== */
+
+.pill-toggle {
+  position: relative;
+  display: flex;
+  width: 260px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background: #f6f6f6;
+  border-radius: 999px;
+  padding: 0px;
+  box-shadow: inset 0 0 0 1px #e0e0e0;
+}
+
+/* Sliding background */
+.pill-slider {
+  position: absolute;
+  top: 8px;
+  margin-left: 4px;
+  margin-right: 8px;
+  width: calc(50% - 14px);
+  height: calc(80%);
+  background: linear-gradient(135deg, #ffb703, #fb8500);
+  border-radius: 999px;
+  transition: left 0.3s ease;
+  z-index: 0;
+}
+
+/* Buttons */
+.pill {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  z-index: 1;
+  border-radius: 999px;
+  align-items: center;
+}
+
+/* Active state text */
+.pill.active {
+  color: #1a1a1a;
+}
+
+/* Remove default focus outlines */
+.pill:focus {
+  outline: none;
+}
+
+/* Mobile tweak */
+@media (max-width: 480px) {
+  .pill-toggle {
+    width: 220px;
+  }
+}
+
+
+/* ===== QUIZ ===== */
+.quiz-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* Question card */
+.question-card {
+  margin-bottom: 20px;
+  padding: 18px;
+  border-radius: 12px;
+}
+
+/* Options */
+.options {
+  margin-top: 10px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.option input[type="radio"] {
+  transform: scale(1.4);
+  cursor: pointer;
+}
+
+.option:hover {
+  background: rgba(255, 183, 3, 0.15);
+}
+
+/* Correct / Wrong */
+.correct {
+  color: #1b9c4a;
+  font-weight: 600;
+}
+
+.wrong {
+  color: #d63031;
+  font-weight: 600;
+}
+
+/* Faculty options */
+.faculty-options li {
+  margin: 6px 0;
+}
+
+/* Results table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.results-table th,
+.results-table td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.results-table th {
+  background: #ffb703;
+  color: #000;
+}
+
+.results-table tr:nth-child(even) {
+  background: #fff7e6;
+}
+
+.results-table tr:hover {
+  background: #ffe8b3;
+}
+
+/* Submit button */
+.submit-btn {
+  margin-top: 20px;
+}
+
+
+
+/* ===== TABLE STUFF ===== */
+details {
+    max-width: 100%;       /* keep inside cell */
+  }
+  details > div {
+    overflow-x: auto;      /* scroll if too wide */
+    white-space: nowrap;   /* prevent wrapping */
+  }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 32px;
+}
+
+th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+
+
+
+/* ===== DETAILS EXPANSION ===== */
+details summary {
+  list-style: none;       /* removes default marker */
+  cursor: pointer;
+}
+details summary::-webkit-details-marker {
+  display: none;          /* hides arrow in WebKit browsers */
+}
+details summary::before {
+  content: "›";           /* right arrow symbol */
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 0.3s ease;
+  font-size: 1.5em;
+  padding: 4px;
+}
+details[open] summary::before {
+  transform: rotate(90deg); /* rotates arrow when expanded */
+}
+details > div {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+details[open] > div {
+  max-height: 500px; /* large enough to fit content */
+}
+
+@media (max-width: 480px) {
+  /* Keep search in the top bar (brand space) */
+  .nav-brand {
+    display: none;
+  }
+}

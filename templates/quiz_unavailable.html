@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Quiz Unavailable{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:600px;margin:80px auto;text-align:center;">
+  <h2>{{ quiz.title }}</h2>
+
+  <div class="card" style="padding:30px;">
+    <h3>Quiz Not Available</h3>
+    <p>{{ reason }}</p>
+
+    <p style="margin-top:20px;color:#777;">
+      Please check back later or contact your faculty.
+    </p>
+  </div>
+</div>
+{% endblock %}

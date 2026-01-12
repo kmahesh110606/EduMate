@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container" style="display:flex;align-items:center;justify-content:center; max-height: fit-content;">
+  <div class="card shadow-lg p-4" style="max-width: 420px; width: 100%;margin:40px auto;">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">Login</h2>
+      <p class="text-muted">Sign in to your account</p>
+    </div>
+
+    {# Notifications are shown via global toast in layout.html #}
+
+    <!-- Pill toggle -->
+    <div class="pill-toggle" id="pillToggle">
+      <div class="pill-slider" id="pillSlider"></div>
+      <button type="button" class="pill active" onclick="toggleLogin('email')" id="emailBtn">Email</button>
+      <button type="button" class="pill" onclick="toggleLogin('regno')" id="regnoBtn">Reg No</button>
+    </div>
+    
+    <form method="post" autocomplete="on" enctype="multipart/form-data">
+      <div id="emailField" class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+      </div>
+
+      <div id="regnoField" class="mb-3" style="display: none;">
+        <label for="reg_no" class="form-label">Registration Number</label>
+        <input type="text" class="form-control" id="reg_no" name="reg_no" placeholder="Enter registration number">
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+
+    <div class="mt-3 text-center">
+      <span class="text-muted">Don't have an account?</span>
+      <a href="/register">Register</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleLogin(mode) {
+    const emailBtn = document.getElementById('emailBtn');
+    const regnoBtn = document.getElementById('regnoBtn');
+    const emailField = document.getElementById('emailField');
+    const regnoField = document.getElementById('regnoField');
+    const pillSlider = document.getElementById('pillSlider');
+
+    if (mode === 'email') {
+      emailBtn.classList.add('active');
+      regnoBtn.classList.remove('active');
+      emailField.style.display = 'block';
+      regnoField.style.display = 'none';
+      pillSlider.style.left = '4px';
+    } else {
+      emailBtn.classList.remove('active');
+      regnoBtn.classList.add('active');
+      emailField.style.display = 'none';
+      regnoField.style.display = 'block';
+      pillSlider.style.left = '132px';
+    }
+  }
+
+  // Set initial slider position
+  window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('pillSlider').style.left = '4px';
+  });
+</script>
+{% endblock %}

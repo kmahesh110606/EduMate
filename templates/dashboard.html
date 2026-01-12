@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+  <h2>Welcome back, {{ details.name }}</h2>
+  <p>{{details.reg_no}}   |   {{details.email}}  </p>
+  <br><br>
+  {% if details.role == 'student' %}
+    <!-- Join class button -->
+        <button class="btn" onclick="openJoinModal()">Join a Class</button>
+    <div class="card">
+      <h3>Your Classes</h3>
+      {% if courses %}
+        <div class="card-list">
+          {% for class in classes %}
+            <div class="card-item" onclick="window.location.href='/class/{{ class.class_no }}'">
+              <div class="btn-text">{{ class.class_name }}</div>
+              <div class="btn-subtext">Class No: {{ class.class_no }} </div>
+              <div class="btn-subtext">Course Code: {{ class.course_code }} </div>
+              <div class="btn-subtext">Faculty: {{ class.faculty_name }} </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No classes enrolled yet. Join one now.</p>
+      {% endif %}      
+    </div>
+
+    <div class="card">
+      <h3>Your Quizzes</h3>
+      {% if quizzes %}
+        <div class="card-list">
+          {% for quiz in quizzes %}
+            <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
+              <div class="btn-text">{{ quiz.title }}</div>
+              <div class="btn-subtext">Class No: {{ quiz.class_no }} </div>
+              <div class="btn-subtext">({{ quiz.status }})</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No quizzes available at the moment.</p>
+      {% endif %}
+    </div>
+    
+
+  {% elif details.role == 'faculty' %}
+        <!-- Create class button -->
+   <button class="btn" onclick="window.location.href='/create_class'">New Class</button>
+      <!-- Create quiz button -->
+      <button class="btn" onclick="window.location.href='/create_quiz'">Create Quiz</button>
+    <div class="card">
+      <h3>Your Classes</h3>
+      {% if classes %}
+        <div class="card-list">
+          {% for class in classes %}
+            <div class="card-item" onclick="window.location.href='/class/{{ class.class_no }}'">
+              <div class="btn-text">{{ class.nickname or class.class_name }}</div>
+              <div class="btn-subtext">Class No: {{ class.class_no }}</div>
+              {% if class.course_code %}<div class="btn-subtext">Course Code: {{ class.course_code }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>You don't have any classes yet. Get started by creating one.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h3>Your Quizzes</h3>
+      {% if quizzes %}
+        <div class="card-list">
+          {% for quiz in quizzes %}
+            <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
+              <div class="btn-text">{{ quiz.title }}</div>
+              <div class="btn-subtext">Class No: {{ quiz.class_no }}</div>
+              <div class="btn-subtext">({{ quiz.status }})</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No quizzes created yet. Create one for your classes.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+  
+<!-- Join Modal -->
+<div id="joinModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Join a Class</h3>
+    <form method="post" action="/join">
+      <label for="class_no">Enter Class ID</label>
+      <input type="text" autofocus id="class_no" name="class_no" placeholder="Class number" required>
+      <button type="submit" class="btn">Join</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openJoinModal() {
+  document.getElementById("joinModal").style.display = "flex";
+}
+function closeModal() {
+  document.getElementById("joinModal").style.display = "none";
+}
+</script>
+<script>
+document.getElementById("joinModal").addEventListener("click", function (e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+</script>
+
+
+</div>
+{% endblock %}

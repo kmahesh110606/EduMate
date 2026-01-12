@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Archive{% endblock %}
+{% block content %}
+<div class="card">
+  <h2> Quiz Archive</h2>
+
+  <form method="get" action="/archive" style="margin-top: 14px;">
+    <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+      <input name="q" placeholder="Search archived quizzes..." value="{{ q or '' }}" style="flex: 1; min-width: 200px; margin: 0;">
+
+      <select name="class_no" style="width: auto; min-width: 200px; margin: 0;">
+        <option value="">All Classes</option>
+        {% for c in classes or [] %}
+          {% set cno = c.class_no %}
+          {% set cname = c.nickname %}
+          <option value="{{ cno }}" {% if selected_class_no == cno|string %}selected{% endif %}>
+            {% if cname %}{{ cname }} — {% endif %}{{ cno }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <select name="sort" style="width: auto; min-width: 160px; margin: 0;">
+        <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+        <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
+        <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+      </select>
+
+      <button type="submit" class="btn" style="margin: 0; padding: 14px 18px;">Apply</button>
+      <a href="/archive" class="btn btn-secondary" style="margin: 0; padding: 14px 18px;">Reset</a>
+    </div>
+  </form>
+
+  {% if quizzes %}
+    <div class="card-list">
+      {% for quiz in quizzes %}
+        <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
+          <div class="btn-text">{{ quiz.title }}</div>
+          <div class="btn-subtext">Class: {% if quiz.class_nickname %}{{ quiz.class_nickname }} — {% endif %}{{ quiz.class_no }}</div>
+          <div class="btn-subtext">Duration: {{ quiz.duration }} mins</div>
+          <div class="btn-subtext">Marks: {{ quiz.total_marks }}</div>
+          <div class="btn-subtext">(archived)</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p> No quizzes found in archive.</p>
+  {% endif %}
+</div>
+{% endblock %}
