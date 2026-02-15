@@ -16,9 +16,11 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 Session(app)
 
-db = SQL("postgresql://postgres:5253@localhost:5432/lms_db")
+database_url = os.environ.get("DATABASE_URL", "postgresql://postgres:5253@localhost:5432/lms_db")
+db = SQL(database_url)
 
 
 @app.route("/")
@@ -411,14 +413,51 @@ def create_quiz(error=None, msg=None, warning=None):
         class_no = request.form.get("class_no")
         total_marks = request.form.get("total_marks")
         duration = request.form.get("duration")
+        quiz_source = (request.form.get("quiz_source") or "upload").strip().lower()
+        add_to_bank = request.form.get("add_to_bank") == "on"
+        bank_count = request.form.get("bank_count")
         file = request.files.get("file")
+
+        if not title or not class_no or not total_marks or not duration:
+            return create_quiz(error="All fields are required.", msg=None, warning=None)
+
+        class_rows = db.execute("SELECT course_code FROM classrooms WHERE class_no = %s", class_no)
+        if not class_rows:
+            return create_quiz(error="Invalid class number.", msg=None, warning=None)
+        course_code = class_rows[0].get("course_code")
+
+        if quiz_source == "bank":
+            try:
+                bank_count_int = int(bank_count or 0)
+            except Exception:
+                bank_count_int = 0
+            if bank_count_int <= 0:
+                return create_quiz(error="Please enter a valid number of questions.", msg=None, warning=None)
+            if not course_code:
+                return create_quiz(error="This class does not have a course code to use for the question bank.", msg=None, warning=None)
+
+            available_rows = db.execute("SELECT COUNT(*) AS count FROM question_bank WHERE course_code = %s", course_code)
+            available_count = available_rows[0].get("count", 0) if available_rows else 0
+            if available_count < bank_count_int:
+                return create_quiz(error=f"Only {available_count} questions are available in the bank for this course.", msg=None, warning=None)
+
+            db.execute(
+                "INSERT INTO quizzes (title, class_no, total_marks, duration, data, source_type, bank_count, bank_course_code) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                title,
+                class_no,
+                total_marks,
+                duration,
+                None,
+                "bank",
+                bank_count_int,
+                course_code,
+            )
+            return dashboard(msg="Quiz created successfully.")
 
         if not file:
             return create_quiz(error="Please upload an Excel file.", msg=None, warning=None)
-        if not file.filename.endswith(('.xlsx', '.xls')):
+        if not file.filename.endswith((".xlsx", ".xls")):
             return create_quiz(error="Invalid file format. Please upload an Excel (.xls or .xlsx) file.", msg=None, warning=None)
-        if not title or not class_no or not total_marks or not duration:
-            return create_quiz(error="All fields are required.", msg=None, warning=None)
         try:
             # Parse Excel
             workbook = openpyxl.load_workbook(file)
@@ -448,9 +487,31 @@ def create_quiz(error=None, msg=None, warning=None):
             data_json = json.dumps(questions)
 
             db.execute(
-                "INSERT INTO quizzes (title, class_no, total_marks, duration, data) VALUES (%s, %s, %s, %s, %s)",
-                title, class_no, total_marks, duration, data_json
+                "INSERT INTO quizzes (title, class_no, total_marks, duration, data, source_type, bank_course_code) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                title,
+                class_no,
+                total_marks,
+                duration,
+                data_json,
+                "upload",
+                course_code,
             )
+
+            if add_to_bank and course_code:
+                for q in questions:
+                    db.execute(
+                        "INSERT INTO question_bank (course_code, question_text, option_a, option_b, option_c, option_d, correct_answer, marks, minus, created_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        course_code,
+                        q.get("ques"),
+                        q.get("a"),
+                        q.get("b"),
+                        q.get("c"),
+                        q.get("d"),
+                        q.get("answer"),
+                        q.get("marks"),
+                        q.get("minus"),
+                        session["user_id"],
+                    )
 
             return dashboard(msg="Quiz created successfully.")
 
@@ -458,6 +519,120 @@ def create_quiz(error=None, msg=None, warning=None):
             return create_quiz(error=f"Error parsing file: {e}. Please ensure it follows the correct format or download the template and try again.", msg=None, warning="Download the template from the link below. <a href='/download_quiz_template'>Download Template</a>")
     classes = db.execute("SELECT class_no FROM classrooms WHERE faculty_id = %s", session["user_id"])
     return render_template("create_quiz.html", classes=classes)
+
+
+@app.route("/question_bank", methods=["GET", "POST"])
+@login_required
+def question_bank():
+    if session.get("role") != "faculty":
+        flash("Only faculty can manage the question bank.", "error")
+        return redirect("/dashboard")
+
+    course_rows = db.execute(
+        "SELECT DISTINCT course_code FROM classrooms WHERE faculty_id = %s AND course_code IS NOT NULL ORDER BY course_code",
+        session["user_id"],
+    )
+    course_codes = [row.get("course_code") for row in course_rows if row.get("course_code")]
+
+    def _valid_course(code):
+        return code in course_codes
+
+    if request.method == "POST":
+        action = (request.form.get("action") or "create").strip().lower()
+        course_code = (request.form.get("course_code") or "").strip()
+
+        if not course_code or not _valid_course(course_code):
+            flash("Please select a valid course code.", "error")
+            return redirect("/question_bank")
+
+        question_text = (request.form.get("question_text") or "").strip()
+        option_a = (request.form.get("option_a") or "").strip()
+        option_b = (request.form.get("option_b") or "").strip()
+        option_c = (request.form.get("option_c") or "").strip()
+        option_d = (request.form.get("option_d") or "").strip()
+        correct_answer = (request.form.get("correct_answer") or "").strip()
+        marks = request.form.get("marks")
+        minus = request.form.get("minus")
+
+        if not question_text or not correct_answer:
+            flash("Question text and correct answer are required.", "error")
+            return redirect(f"/question_bank?course_code={course_code}")
+
+        if action == "update":
+            question_id = request.form.get("question_id")
+            if not question_id:
+                flash("Missing question id for update.", "error")
+                return redirect(f"/question_bank?course_code={course_code}")
+
+            db.execute(
+                "UPDATE question_bank SET course_code=%s, question_text=%s, option_a=%s, option_b=%s, option_c=%s, option_d=%s, correct_answer=%s, marks=%s, minus=%s WHERE id=%s",
+                course_code,
+                question_text,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                correct_answer,
+                marks,
+                minus,
+                question_id,
+            )
+            flash("Question updated.", "success")
+            return redirect(f"/question_bank?course_code={course_code}")
+
+        db.execute(
+            "INSERT INTO question_bank (course_code, question_text, option_a, option_b, option_c, option_d, correct_answer, marks, minus, created_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            course_code,
+            question_text,
+            option_a,
+            option_b,
+            option_c,
+            option_d,
+            correct_answer,
+            marks,
+            minus,
+            session["user_id"],
+        )
+        flash("Question added to the bank.", "success")
+        return redirect(f"/question_bank?course_code={course_code}")
+
+    selected_course = (request.args.get("course_code") or "").strip()
+    if not selected_course and course_codes:
+        selected_course = course_codes[0]
+
+    questions = []
+    if selected_course:
+        questions = db.execute(
+            "SELECT * FROM question_bank WHERE course_code = %s ORDER BY id DESC",
+            selected_course,
+        )
+
+    return render_template(
+        "question_bank.html",
+        course_codes=course_codes,
+        selected_course=selected_course,
+        questions=questions,
+    )
+
+
+@app.route("/question_bank/delete", methods=["POST"])
+@login_required
+def delete_question_bank_item():
+    if session.get("role") != "faculty":
+        flash("Only faculty can manage the question bank.", "error")
+        return redirect("/dashboard")
+
+    question_id = request.form.get("question_id")
+    course_code = (request.form.get("course_code") or "").strip()
+    if not question_id:
+        flash("Missing question id.", "error")
+        return redirect("/question_bank")
+
+    db.execute("DELETE FROM question_bank WHERE id = %s", question_id)
+    flash("Question deleted.", "success")
+    if course_code:
+        return redirect(f"/question_bank?course_code={course_code}")
+    return redirect("/question_bank")
 
 
 @app.route("/download_quiz_template")
@@ -613,6 +788,7 @@ def quiz_page(quiz_id):
     if not quiz_rows:
         return render_template("dashboard.html", error="Quiz not found.")
     quiz = quiz_rows[0]
+    quiz_source = (quiz.get("source_type") or "upload").strip().lower()
 
     if session["role"] == "student":
         enrollment = db.execute("SELECT * FROM enrollments WHERE class_no = %s AND student_id = %s", quiz["class_no"], session["user_id"])
@@ -640,10 +816,61 @@ def quiz_page(quiz_id):
 
     questions = _parse_questions(quiz.get("data"))
 
+    def _parse_attempt_questions(attempt_row):
+        if not attempt_row:
+            return None
+        questions_value = attempt_row.get("questions")
+        if questions_value is not None and questions_value != "":
+            if isinstance(questions_value, list):
+                return questions_value
+            if isinstance(questions_value, tuple):
+                return list(questions_value)
+            if isinstance(questions_value, str):
+                try:
+                    parsed = json.loads(questions_value)
+                    return parsed if isinstance(parsed, list) else None
+                except Exception:
+                    return None
+        return None
+
+    def _fetch_bank_questions(course_code, limit):
+        rows = db.execute(
+            "SELECT id, question_text, option_a, option_b, option_c, option_d, correct_answer, marks, minus FROM question_bank WHERE course_code = %s",
+            course_code,
+        )
+        if not rows:
+            return []
+        if limit >= len(rows):
+            picked = rows
+        else:
+            picked = random.sample(rows, limit)
+        return [
+            {
+                "ques_id": r.get("id"),
+                "ques": r.get("question_text"),
+                "a": r.get("option_a"),
+                "b": r.get("option_b"),
+                "c": r.get("option_c"),
+                "d": r.get("option_d"),
+                "answer": r.get("correct_answer"),
+                "marks": r.get("marks"),
+                "minus": r.get("minus"),
+            }
+            for r in picked
+        ]
+
     scores = db.execute(
         "SELECT qa.*, u.* FROM quiz_attempts qa JOIN users u ON qa.student_id = u.id WHERE qa.quiz_id = %s",
         quiz_id,
     ) or None
+
+    scores_view = []
+    for score in scores or []:
+        score_questions = _parse_attempt_questions(score) or questions
+        score_answers = _parse_attempt_answers(score, len(score_questions)) if score_questions else []
+        score["questions_list"] = score_questions
+        score["answers_list"] = score_answers
+        scores_view.append(score)
 
     def _to_number(value):
         try:
@@ -687,7 +914,7 @@ def quiz_page(quiz_id):
                 "quiz.html",
                 quiz=quiz,
                 questions=questions,
-                scores=scores,
+                scores=scores_view,
                 attempt=None,
                 attempt_answers=None,
             )
@@ -699,6 +926,24 @@ def quiz_page(quiz_id):
                 session["user_id"],
             )
             attempt = given_attempt_rows[0] if given_attempt_rows else None
+            attempt_questions = _parse_attempt_questions(attempt)
+
+            if quiz_source == "bank" and attempt is None:
+                session_key = f"bank_questions_{quiz_id}"
+                sampled = session.get(session_key)
+                if not sampled:
+                    course_code = quiz.get("bank_course_code")
+                    bank_count = quiz.get("bank_count") or 0
+                    try:
+                        bank_count = int(bank_count)
+                    except Exception:
+                        bank_count = 0
+                    sampled = _fetch_bank_questions(course_code, bank_count)
+                    session[session_key] = sampled
+                questions = sampled
+            elif attempt_questions:
+                questions = attempt_questions
+
             attempt_answers = _parse_attempt_answers(attempt, len(questions))
 
             return render_template(
@@ -723,7 +968,7 @@ def quiz_page(quiz_id):
                         "quiz.html",
                         quiz=quiz,
                         questions=questions,
-                        scores=scores,
+                        scores=scores_view,
                         attempt=None,
                         attempt_answers=None,
                         msg="Quiz unarchived successfully!",
@@ -735,7 +980,7 @@ def quiz_page(quiz_id):
                     "quiz.html",
                     quiz=quiz,
                     questions=questions,
-                    scores=scores,
+                    scores=scores_view,
                     attempt=None,
                     attempt_answers=None,
                     msg="Quiz archived successfully!",
@@ -747,7 +992,7 @@ def quiz_page(quiz_id):
                     "quiz.html",
                     quiz=quiz,
                     questions=questions,
-                    scores=scores,
+                    scores=scores_view,
                     attempt=None,
                     attempt_answers=None,
                     warning="Unarchive the quiz to start/stop it.",
@@ -760,7 +1005,7 @@ def quiz_page(quiz_id):
                     "quiz.html",
                     quiz=quiz,
                     questions=questions,
-                    scores=scores,
+                    scores=scores_view,
                     attempt=None,
                     attempt_answers=None,
                     msg="Quiz started successfully!",
@@ -772,7 +1017,7 @@ def quiz_page(quiz_id):
                     "quiz.html",
                     quiz=quiz,
                     questions=questions,
-                    scores=scores,
+                    scores=scores_view,
                     attempt=None,
                     attempt_answers=None,
                     msg="Quiz stopped successfully!",
@@ -781,7 +1026,7 @@ def quiz_page(quiz_id):
                 "quiz.html",
                 quiz=quiz,
                 questions=questions,
-                scores=scores,
+                scores=scores_view,
                 attempt=None,
                 attempt_answers=None,
                 error="Invalid quiz status.",
@@ -817,6 +1062,17 @@ def quiz_page(quiz_id):
                 warning="You have already attempted this quiz.",
             )
 
+        if quiz_source == "bank":
+            session_key = f"bank_questions_{quiz_id}"
+            questions = session.get(session_key) or []
+            if not questions:
+                course_code = quiz.get("bank_course_code")
+                bank_count = quiz.get("bank_count") or 0
+                try:
+                    bank_count = int(bank_count)
+                except Exception:
+                    bank_count = 0
+                questions = _fetch_bank_questions(course_code, bank_count)
         student_answers = []
         total_score = 0.0
         for i, q in enumerate(questions):
@@ -834,12 +1090,13 @@ def quiz_page(quiz_id):
 
         submitted_at = datetime.now()
         db.execute(
-            "INSERT INTO quiz_attempts (quiz_id, student_id, score, submitted_at, answers) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO quiz_attempts (quiz_id, student_id, score, submitted_at, answers, questions) VALUES (%s, %s, %s, %s, %s, %s)",
             quiz_id,
             session["user_id"],
             total_score,
             submitted_at,
             json.dumps(student_answers),
+            json.dumps(questions),
         )
 
         attempt = {
@@ -848,7 +1105,10 @@ def quiz_page(quiz_id):
             "score": total_score,
             "submitted_at": submitted_at,
             "answers": json.dumps(student_answers),
+            "questions": json.dumps(questions),
         }
+        if quiz_source == "bank":
+            session.pop(f"bank_questions_{quiz_id}", None)
         return render_template(
             "quiz.html",
             quiz=quiz,

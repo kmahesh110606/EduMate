@@ -39,17 +39,6 @@
             EduMate
         </div>
 
-        <div class="nav-search" id="navSearch">
-            <input
-                id="navbarSearchInput"
-                class="nav-search-input"
-                type="text"
-                placeholder="Search..."
-                autocomplete="off"
-                aria-label="Search"
-            >
-            <div id="navbarSearchDropdown" class="nav-search-dropdown" aria-label="Search results"></div>
-        </div>
     </div>
 
     <ul class="nav-links">
@@ -95,6 +84,16 @@
                 <span>Archive</span>
             </a>
         </li>
+
+        {% if session.get('role') == 'faculty' %}
+        <!-- Question Bank -->
+        <li class="{% if request.path == '/question_bank' %}active{% endif %}">
+            <a href="/question_bank">
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5.25 4A2.25 2.25 0 0 0 3 6.25v11.5A2.25 2.25 0 0 0 5.25 20h13.5A2.25 2.25 0 0 0 21 17.75V6.25A2.25 2.25 0 0 0 18.75 4H5.25Zm0 1.5h13.5c.414 0 .75.336.75.75v11.5a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V6.25c0-.414.336-.75.75-.75Zm2.5 2.5h6.5a.75.75 0 0 1 .102 1.493L14.25 9.5h-6.5a.75.75 0 0 1-.102-1.493L7.75 8Zm0 3.5h8.5a.75.75 0 0 1 .102 1.493L16.25 13h-8.5a.75.75 0 0 1-.102-1.493L7.75 11.5Zm0 3.5h5.5a.75.75 0 0 1 .102 1.493L13.25 16.5h-5.5a.75.75 0 0 1-.102-1.493L7.75 15Z" fill="#0e0f11"/></svg>
+                <span>Question Bank</span>
+            </a>
+        </li>
+        {% endif %}
 
         <!-- Logout -->
         <li>
@@ -164,6 +163,16 @@
             </span>
     </a>
 
+    {% if session.get('role') == 'faculty' %}
+    <!-- Question Bank -->
+    <a href="/question_bank">
+        <span>
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5.25 4A2.25 2.25 0 0 0 3 6.25v11.5A2.25 2.25 0 0 0 5.25 20h13.5A2.25 2.25 0 0 0 21 17.75V6.25A2.25 2.25 0 0 0 18.75 4H5.25Zm0 1.5h13.5c.414 0 .75.336.75.75v11.5a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V6.25c0-.414.336-.75.75-.75Zm2.5 2.5h6.5a.75.75 0 0 1 .102 1.493L14.25 9.5h-6.5a.75.75 0 0 1-.102-1.493L7.75 8Zm0 3.5h8.5a.75.75 0 0 1 .102 1.493L16.25 13h-8.5a.75.75 0 0 1-.102-1.493L7.75 11.5Zm0 3.5h5.5a.75.75 0 0 1 .102 1.493L13.25 16.5h-5.5a.75.75 0 0 1-.102-1.493L7.75 15Z" fill="#0e0f11"/></svg>
+                <span>Question Bank</span>
+        </span>
+    </a>
+    {% endif %}
+
     <!-- Logout -->
      <a href="/logout">
         <span>
@@ -178,7 +187,4 @@
 
 </body>
 
-{% if session['user_id'] is defined %}
-<script src="{{ url_for('static', filename='js/navbar_search.js') }}"></script>
-{% endif %}
 </html>

@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block title %}Question Bank{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Question Bank</h2>
+  {% if course_codes and course_codes|length > 0 %}
+  <form method="get" action="/question_bank" style="margin-top: 10px;">
+    <label class="form-label" for="course_code">Course</label>
+    <select id="course_code" name="course_code" onchange="this.form.submit()">
+      {% for code in course_codes %}
+        <option value="{{ code }}" {% if code == selected_course %}selected{% endif %}>{{ code }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% else %}
+    <p>No course codes found for your classes. Add a course code to a class first.</p>
+  {% endif %}
+</div>
+
+{% if course_codes and selected_course %}
+<div class="card">
+  <h3>Add New Question</h3>
+  <form method="post" action="/question_bank">
+    <input type="hidden" name="action" value="create">
+    <input type="hidden" name="course_code" value="{{ selected_course }}">
+
+    <label class="form-label" for="question_text">Question</label>
+    <textarea id="question_text" name="question_text" rows="3" required></textarea>
+
+    <label class="form-label" for="option_a">Option A</label>
+    <input type="text" id="option_a" name="option_a">
+
+    <label class="form-label" for="option_b">Option B</label>
+    <input type="text" id="option_b" name="option_b">
+
+    <label class="form-label" for="option_c">Option C</label>
+    <input type="text" id="option_c" name="option_c">
+
+    <label class="form-label" for="option_d">Option D</label>
+    <input type="text" id="option_d" name="option_d">
+
+    <label class="form-label" for="correct_answer">Correct Answer (A/B/C/D)</label>
+    <input type="text" id="correct_answer" name="correct_answer" maxlength="1" required>
+
+    <label class="form-label" for="marks">Marks</label>
+    <input type="number" id="marks" name="marks" step="0.25">
+
+    <label class="form-label" for="minus">Negative Marks</label>
+    <input type="number" id="minus" name="minus" step="0.25">
+
+    <button type="submit" class="btn">Add Question</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Questions for {{ selected_course }}</h3>
+  {% if questions and questions|length > 0 %}
+  <table>
+    <tr>
+      <th>Question</th>
+      <th>Options</th>
+      <th>Answer</th>
+      <th>Marks</th>
+      <th>Actions</th>
+    </tr>
+    {% for q in questions %}
+      <tr>
+        <td style="min-width: 280px;">
+          <form method="post" action="/question_bank">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="question_id" value="{{ q.id }}">
+            <input type="hidden" name="course_code" value="{{ selected_course }}">
+            <textarea name="question_text" rows="3" required>{{ q.question_text }}</textarea>
+        </td>
+        <td style="min-width: 220px;">
+            <input type="text" name="option_a" placeholder="A" value="{{ q.option_a }}">
+            <input type="text" name="option_b" placeholder="B" value="{{ q.option_b }}">
+            <input type="text" name="option_c" placeholder="C" value="{{ q.option_c }}">
+            <input type="text" name="option_d" placeholder="D" value="{{ q.option_d }}">
+        </td>
+        <td style="min-width: 90px;">
+            <input type="text" name="correct_answer" maxlength="1" value="{{ q.correct_answer }}">
+        </td>
+        <td style="min-width: 90px;">
+            <input type="number" name="marks" step="0.25" value="{{ q.marks }}">
+            <input type="number" name="minus" step="0.25" value="{{ q.minus }}">
+        </td>
+        <td>
+            <button type="submit" class="btn" style="margin: 6px 0; padding: 10px 18px;">Update</button>
+          </form>
+          <form method="post" action="/question_bank/delete" style="margin-top: 8px;">
+            <input type="hidden" name="question_id" value="{{ q.id }}">
+            <input type="hidden" name="course_code" value="{{ selected_course }}">
+            <button type="submit" class="btn" style="margin: 0; padding: 10px 18px; background: linear-gradient(135deg, #b00020, #7f0a1c);">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p>No questions found for this course yet.</p>
+  {% endif %}
+</div>
+{% endif %}
+<script src="{{ url_for('static', filename='js/question_bank.js') }}"></script>
+{% endblock %}

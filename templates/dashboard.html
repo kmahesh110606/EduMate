@@ -3,45 +3,61 @@
 
 <div class="container">
 
+  <div class="dashboard-search">
+    <div class="nav-search" id="navSearch">
+      <input
+        id="navbarSearchInput"
+        class="nav-search-input"
+        type="text"
+        placeholder="Search..."
+        autocomplete="off"
+        aria-label="Search"
+      >
+      <div id="navbarSearchDropdown" class="nav-search-dropdown" aria-label="Search results"></div>
+    </div>
+  </div>
+
   <h2>Welcome back, {{ details.name }}</h2>
   <p>{{details.reg_no}}   |   {{details.email}}  </p>
   <br><br>
   {% if details.role == 'student' %}
     <!-- Join class button -->
         <button class="btn" onclick="openJoinModal()">Join a Class</button>
-    <div class="card">
-      <h3>Your Classes</h3>
-      {% if courses %}
-        <div class="card-list">
-          {% for class in classes %}
-            <div class="card-item" onclick="window.location.href='/class/{{ class.class_no }}'">
-              <div class="btn-text">{{ class.class_name }}</div>
-              <div class="btn-subtext">Class No: {{ class.class_no }} </div>
-              <div class="btn-subtext">Course Code: {{ class.course_code }} </div>
-              <div class="btn-subtext">Faculty: {{ class.faculty_name }} </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p>No classes enrolled yet. Join one now.</p>
-      {% endif %}      
-    </div>
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>Your Classes</h3>
+        {% if courses %}
+          <div class="card-list">
+            {% for class in classes %}
+              <div class="card-item" onclick="window.location.href='/class/{{ class.class_no }}'">
+                <div class="btn-text">{{ class.nickname or class.class_name or 'Class' }}</div>
+                <div class="btn-subtext">Class No: {{ class.class_no }}</div>
+                {% if class.course_code %}<div class="btn-subtext">Course Code: {{ class.course_code }}</div>{% endif %}
+                {% if class.faculty_name %}<div class="btn-subtext">Faculty: {{ class.faculty_name }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>No classes enrolled yet. Join one now.</p>
+        {% endif %}      
+      </div>
 
-    <div class="card">
-      <h3>Your Quizzes</h3>
-      {% if quizzes %}
-        <div class="card-list">
-          {% for quiz in quizzes %}
-            <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
-              <div class="btn-text">{{ quiz.title }}</div>
-              <div class="btn-subtext">Class No: {{ quiz.class_no }} </div>
-              <div class="btn-subtext">({{ quiz.status }})</div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p>No quizzes available at the moment.</p>
-      {% endif %}
+      <div class="card">
+        <h3>Your Quizzes</h3>
+        {% if quizzes %}
+          <div class="card-list">
+            {% for quiz in quizzes %}
+              <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
+                <div class="btn-text">{{ quiz.title }}</div>
+                <div class="btn-subtext">Class No: {{ quiz.class_no }} </div>
+                <div class="btn-subtext">({{ quiz.status }})</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>No quizzes available at the moment.</p>
+        {% endif %}
+      </div>
     </div>
     
 
@@ -50,38 +66,40 @@
    <button class="btn" onclick="window.location.href='/create_class'">New Class</button>
       <!-- Create quiz button -->
       <button class="btn" onclick="window.location.href='/create_quiz'">Create Quiz</button>
-    <div class="card">
-      <h3>Your Classes</h3>
-      {% if classes %}
-        <div class="card-list">
-          {% for class in classes %}
-            <div class="card-item" onclick="window.location.href='/class/{{ class.class_no }}'">
-              <div class="btn-text">{{ class.nickname or class.class_name }}</div>
-              <div class="btn-subtext">Class No: {{ class.class_no }}</div>
-              {% if class.course_code %}<div class="btn-subtext">Course Code: {{ class.course_code }}</div>{% endif %}
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p>You don't have any classes yet. Get started by creating one.</p>
-      {% endif %}
-    </div>
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>Your Classes</h3>
+        {% if classes %}
+          <div class="card-list">
+            {% for class in classes %}
+              <div class="card-item" onclick="window.location.href='/class/{{ class.class_no }}'">
+                <div class="btn-text">{{ class.nickname or class.class_name or 'Class' }}</div>
+                <div class="btn-subtext">Class No: {{ class.class_no }}</div>
+                {% if class.course_code %}<div class="btn-subtext">Course Code: {{ class.course_code }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>You don't have any classes yet. Get started by creating one.</p>
+        {% endif %}
+      </div>
 
-    <div class="card">
-      <h3>Your Quizzes</h3>
-      {% if quizzes %}
-        <div class="card-list">
-          {% for quiz in quizzes %}
-            <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
-              <div class="btn-text">{{ quiz.title }}</div>
-              <div class="btn-subtext">Class No: {{ quiz.class_no }}</div>
-              <div class="btn-subtext">({{ quiz.status }})</div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p>No quizzes created yet. Create one for your classes.</p>
-      {% endif %}
+      <div class="card">
+        <h3>Your Quizzes</h3>
+        {% if quizzes %}
+          <div class="card-list">
+            {% for quiz in quizzes %}
+              <div class="card-item" onclick="window.location.href='/quiz/{{ quiz.quiz_id }}'">
+                <div class="btn-text">{{ quiz.title }}</div>
+                <div class="btn-subtext">Class No: {{ quiz.class_no }}</div>
+                <div class="btn-subtext">({{ quiz.status }})</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>No quizzes created yet. Create one for your classes.</p>
+        {% endif %}
+      </div>
     </div>
   {% endif %}
   
@@ -116,4 +134,7 @@ document.getElementById("joinModal").addEventListener("click", function (e) {
 
 
 </div>
+{% if session['user_id'] is defined %}
+<script src="{{ url_for('static', filename='js/navbar_search.js') }}"></script>
+{% endif %}
 {% endblock %}

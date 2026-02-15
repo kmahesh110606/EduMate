@@ -19,6 +19,18 @@
       {% endfor %}
     </select>
 
+    <label class="form-label" for="quiz_source">Quiz Source</label>
+    <div style="display:flex; gap: 14px; margin: 8px 0 16px; flex-wrap: wrap;">
+      <label style="display:flex; align-items:center; gap: 8px;">
+        <input type="radio" name="quiz_source" value="upload" checked>
+        Upload Excel
+      </label>
+      <label style="display:flex; align-items:center; gap: 8px;">
+        <input type="radio" name="quiz_source" value="bank">
+        Random from Question Bank
+      </label>
+    </div>
+
     <label class="form-label" for="total_marks">
        Total Marks
     </label>
@@ -29,14 +41,24 @@
     </label>
     <input type="number" id="duration" name="duration" required>
 
-    <label class="form-label" for="retake">
-      Allow Retake?
-    </label>
+    <div id="uploadSection">
+      <label class="form-label" for="file">
+         Upload Questions File (.xlsx)
+      </label>
+      <input type="file" id="file" name="file" accept=".xlsx,.xls" required>
 
-    <label class="form-label" for="file">
-       Upload Questions File (.xlsx)
-    </label>
-    <input type="file" id="file" name="file" accept=".xlsx,.xls" required>
+      <label style="display:flex; align-items:center; gap: 10px; margin-top: 10px;">
+        <input type="checkbox" id="add_to_bank" name="add_to_bank">
+        Add uploaded questions to the Question Bank
+      </label>
+    </div>
+
+    <div id="bankSection" style="display:none;">
+      <label class="form-label" for="bank_count">
+        Number of Questions (from bank)
+      </label>
+      <input type="number" id="bank_count" name="bank_count" min="1">
+    </div>
 
     <button type="button" class="btn-secondary" onclick="window.location.href='/download_quiz_template'">
       Download Quiz Template
@@ -49,4 +71,29 @@
     </button>
   </form>
 </div>
+<script>
+  (function () {
+    const uploadSection = document.getElementById("uploadSection");
+    const bankSection = document.getElementById("bankSection");
+    const fileInput = document.getElementById("file");
+    const bankCountInput = document.getElementById("bank_count");
+
+    function updateSource() {
+      const selected = document.querySelector("input[name='quiz_source']:checked");
+      const isBank = selected && selected.value === "bank";
+
+      if (uploadSection) uploadSection.style.display = isBank ? "none" : "block";
+      if (bankSection) bankSection.style.display = isBank ? "block" : "none";
+
+      if (fileInput) fileInput.required = !isBank;
+      if (bankCountInput) bankCountInput.required = isBank;
+    }
+
+    document.querySelectorAll("input[name='quiz_source']").forEach((radio) => {
+      radio.addEventListener("change", updateSource);
+    });
+
+    updateSource();
+  })();
+</script>
 {% endblock %}

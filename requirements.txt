@@ -4,3 +4,4 @@ cs50
 psycopg2-binary
 Werkzeug
 openpyxl
+gunicorn

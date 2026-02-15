@@ -39,7 +39,10 @@
   <br>
   <div class="card" style="margin: 0; padding: 28px;">
       <h3>Questions</h3>
-      {% if questions %}
+      {% if quiz.source_type == 'bank' %}
+        <p>This quiz uses random questions from the course question bank.</p>
+      {% endif %}
+      {% if questions and quiz.source_type != 'bank' %}
         <div class="card-list" style="min-width: none;">
           {% for question in questions %}
             <div class="card-item" style="min-width: -webkit-fill-available;">
@@ -79,7 +82,22 @@
             <td>{{ score.name }}</td>
             <td>{{ score.score }} / {{ quiz.total_marks }}</td>
             <td>{{ score.submitted_at }}</td>
-            <td><details><summary>View Answers</summary>{{ score.answers }}</details></td>
+            <td>
+              <details>
+                <summary>View Answers</summary>
+                {% if score.questions_list %}
+                  <div>
+                    {% for question in score.questions_list %}
+                      <p><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+                      {% set selected = score.answers_list[loop.index0] if score.answers_list and score.answers_list|length > loop.index0 else '' %}
+                      <p>Selected: {{ selected if selected else 'Not Answered' }}</p>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div>No answers recorded.</div>
+                {% endif %}
+              </details>
+            </td>
           </tr>
         {% endfor %}
       </table>
