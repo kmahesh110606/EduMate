@@ -31,7 +31,7 @@
     <!-- Join class button -->
         <button class="btn" onclick="openJoinModal()">Join a Class</button>
     <div class="dashboard-grid">
-      <div class="card">
+      <div class="card dashboard-panel">
         <h3>Your Classes</h3>
         {% if courses %}
           <div class="card-list">
@@ -49,7 +49,7 @@
         {% endif %}      
       </div>
 
-      <div class="card">
+      <div class="card dashboard-panel">
         <h3>Your Quizzes</h3>
         {% if quizzes %}
           <div class="card-list">
@@ -74,7 +74,7 @@
       <!-- Create quiz button -->
       <button class="btn" onclick="window.location.href='/create_quiz'">Create Quiz</button>
     <div class="dashboard-grid">
-      <div class="card">
+      <div class="card dashboard-panel">
         <h3>Your Classes</h3>
         {% if classes %}
           <div class="card-list">
@@ -91,7 +91,7 @@
         {% endif %}
       </div>
 
-      <div class="card">
+      <div class="card dashboard-panel">
         <h3>Your Quizzes</h3>
         {% if quizzes %}
           <div class="card-list">
