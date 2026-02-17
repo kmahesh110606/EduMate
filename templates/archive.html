@@ -4,11 +4,11 @@
 <div class="card">
   <h2> Quiz Archive</h2>
 
-  <form method="get" action="/archive" style="margin-top: 14px;">
-    <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
-      <input name="q" placeholder="Search archived quizzes..." value="{{ q or '' }}" style="flex: 1; min-width: 200px; margin: 0;">
+  <form method="get" action="/archive" class="archive-filter-form">
+    <div class="archive-filter-row">
+      <input name="q" placeholder="Search archived quizzes..." value="{{ q or '' }}" class="archive-filter-input">
 
-      <select name="class_no" style="width: auto; min-width: 200px; margin: 0;">
+      <select name="class_no" class="archive-filter-select archive-filter-select-class">
         <option value="">All Classes</option>
         {% for c in classes or [] %}
           {% set cno = c.class_no %}
@@ -19,14 +19,14 @@
         {% endfor %}
       </select>
 
-      <select name="sort" style="width: auto; min-width: 160px; margin: 0;">
+      <select name="sort" class="archive-filter-select archive-filter-select-sort">
         <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
         <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
         <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
       </select>
 
-      <button type="submit" class="btn" style="margin: 0; padding: 14px 18px;">Apply</button>
-      <a href="/archive" class="btn btn-secondary" style="margin: 0; padding: 14px 18px;">Reset</a>
+      <button type="submit" class="btn archive-filter-btn">Apply</button>
+      <a href="/archive" class="btn btn-secondary archive-filter-btn">Reset</a>
     </div>
   </form>
 

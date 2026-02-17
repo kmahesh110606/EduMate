@@ -859,27 +859,6 @@ def quiz_page(quiz_id):
             for r in picked
         ]
 
-    scores = db.execute(
-        "SELECT qa.*, u.* FROM quiz_attempts qa JOIN users u ON qa.student_id = u.id WHERE qa.quiz_id = %s",
-        quiz_id,
-    ) or None
-
-    scores_view = []
-    for score in scores or []:
-        score_questions = _parse_attempt_questions(score) or questions
-        score_answers = _parse_attempt_answers(score, len(score_questions)) if score_questions else []
-        score["questions_list"] = score_questions
-        score["answers_list"] = score_answers
-        scores_view.append(score)
-
-    def _to_number(value):
-        try:
-            if value is None or value == "":
-                return 0
-            return float(value)
-        except Exception:
-            return 0
-
     def _parse_attempt_answers(attempt_row, question_count):
         if not attempt_row:
             return None
@@ -907,6 +886,27 @@ def quiz_page(quiz_id):
                 legacy.append(attempt_row.get(key) or "")
 
         return legacy if has_any else None
+
+    scores = db.execute(
+        "SELECT qa.*, u.* FROM quiz_attempts qa JOIN users u ON qa.student_id = u.id WHERE qa.quiz_id = %s",
+        quiz_id,
+    ) or None
+
+    scores_view = []
+    for score in scores or []:
+        score_questions = _parse_attempt_questions(score) or questions
+        score_answers = _parse_attempt_answers(score, len(score_questions)) if score_questions else []
+        score["questions_list"] = score_questions
+        score["answers_list"] = score_answers
+        scores_view.append(score)
+
+    def _to_number(value):
+        try:
+            if value is None or value == "":
+                return 0
+            return float(value)
+        except Exception:
+            return 0
 
     if request.method == "GET":
         if session["role"] == "faculty":

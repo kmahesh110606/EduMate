@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const quizAttemptUI = document.getElementById("quizAttemptUI");
   const saveStatus = document.getElementById("saveStatus");
   const progressText = document.getElementById("progressText");
+  const submitBtn = document.getElementById("submitBtn");
 
   /* ===================== QUESTION NAV ===================== */
   let blocks = Array.from(document.querySelectorAll(".question-block"));
@@ -50,8 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
-    const submitBtn = document.getElementById("submitBtn");
-
     if (prevBtn) prevBtn.style.display = index === 0 ? "none" : "inline-block";
     if (nextBtn) nextBtn.style.display = index === blocks.length - 1 ? "none" : "inline-block";
     if (submitBtn) submitBtn.style.display = index === blocks.length - 1 ? "inline-block" : "none";
@@ -122,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (remaining < 0) {
         localStorage.removeItem(timerKey);
         localStorage.removeItem(answersKey);
-        quizForm.submit();
+        forceSubmit("time_up");
       }
     };
 
@@ -154,16 +153,54 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
   document.body.appendChild(jail);
 
+  const securityToast = document.createElement("div");
+  securityToast.style.cssText = `
+    position:fixed;
+    top:18px;
+    right:18px;
+    background:rgba(14,15,17,0.9);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:0.92rem;
+    z-index:100000;
+    opacity:0;
+    transform:translateY(-8px);
+    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+    max-width:min(92vw, 360px);
+  `;
+  document.body.appendChild(securityToast);
+
   let submitting = false;
+  let allowUnload = false;
   let lastViolationAt = 0;
+  let ignoreViolationsUntil = 0;
+  let securityToastTimer = null;
+
+  function showSecurityToast(message, isError) {
+    securityToast.textContent = message;
+    securityToast.style.background = isError ? "rgba(127, 10, 28, 0.92)" : "rgba(14, 15, 17, 0.9)";
+    securityToast.style.opacity = "1";
+    securityToast.style.transform = "translateY(0)";
+    if (securityToastTimer) clearTimeout(securityToastTimer);
+    securityToastTimer = setTimeout(() => {
+      securityToast.style.opacity = "0";
+      securityToast.style.transform = "translateY(-8px)";
+    }, isError ? 2400 : 1800);
+  }
 
   function forceSubmit(reason) {
     if (!securityArmed || submitting) return;
     submitting = true;
+    allowUnload = true;
+    securityArmed = false;
     try {
       const reasonEl = document.getElementById("autoSubmitReason");
       if (reasonEl) reasonEl.value = reason || "auto_submit";
     } catch {}
+    if (timerInterval) clearInterval(timerInterval);
     localStorage.removeItem(timerKey);
     localStorage.removeItem(answersKey);
     quizForm.submit();
@@ -173,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!securityArmed || submitting) return;
 
     const now = Date.now();
+    if (now < ignoreViolationsUntil) return;
     // Debounce repeated events (blur can fire multiple times)
     if (now - lastViolationAt < 800) return;
     lastViolationAt = now;
@@ -183,8 +221,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const prettyReason = reason ? ` (${reason})` : "";
       strikeText.innerText = `Violations: ${strikes} / ${MAX_STRIKES}${prettyReason}`;
     }
+    showSecurityToast(`Security warning ${strikes}/${MAX_STRIKES}${reason ? `: ${reason}` : ""}`, false);
 
     jail.style.display = "flex";
+    ignoreViolationsUntil = now + 2300;
     setTimeout(() => {
       jail.style.display = "none";
       // Try to pull them back into fullscreen after warning
@@ -192,6 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 2000);
 
     if (strikes >= MAX_STRIKES) {
+      showSecurityToast("Malpractice limit reached. Auto-submitting quiz.", true);
       forceSubmit(reason || "malpractice");
     }
   }
@@ -256,9 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===================== AUTO SUBMIT ON LEAVE ===================== */
   window.addEventListener("beforeunload", e => {
-    if (!securityArmed) return;
-    // Best-effort; browsers may ignore during unload
-    try { quizForm.submit(); } catch {}
+    if (!securityArmed || submitting || allowUnload) return;
     e.preventDefault();
     e.returnValue = "";
   });
@@ -325,7 +364,18 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  if (submitBtn) {
+    submitBtn.addEventListener("click", () => {
+      submitting = true;
+      allowUnload = true;
+      securityArmed = false;
+    });
+  }
+
   quizForm.addEventListener("submit", () => {
+    submitting = true;
+    allowUnload = true;
+    securityArmed = false;
     // Attempt is being submitted; clear local persistence
     localStorage.removeItem(timerKey);
     localStorage.removeItem(answersKey);
