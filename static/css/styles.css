@@ -285,7 +285,7 @@ button:hover,
 }
 
 .btn-delete {
-  background: linear-gradient(135deg, var(--text-muted), var(--text-dark));
+  background: linear-gradient(135deg, #c41f3e, #7f0a1c);
 }
 
 .quiz-action-btn[disabled] {
@@ -1305,6 +1305,30 @@ select option:checked {
   line-height: 48px;
 }
 
+.archive-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.archive-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(14, 15, 17, 0.62);
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.archive-search-wrap .archive-filter-input {
+  width: 100%;
+  padding-left: 44px;
+}
+
 .archive-filter-input::placeholder {
   color: rgba(14, 15, 17, 0.52);
 }
@@ -1314,6 +1338,10 @@ select option:checked {
   color: var(--text-dark);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+[data-theme="dark"] .archive-search-icon {
+  color: rgba(243, 244, 246, 0.7);
 }
 
 [data-theme="dark"] .archive-filter-input::placeholder {
@@ -1331,6 +1359,45 @@ select option:checked {
 
 .archive-filter-select-sort {
   min-width: 160px;
+}
+
+.question-bank-course-form {
+  margin-top: 10px;
+}
+
+.question-bank-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.question-bank-table {
+  width: 100%;
+}
+
+.qb-col-question {
+  min-width: 260px;
+}
+
+.qb-col-options {
+  min-width: 220px;
+}
+
+.qb-col-answer,
+.qb-col-marks {
+  min-width: 100px;
+}
+
+.qb-col-actions {
+  min-width: 130px;
+}
+
+.qb-action-btn {
+  margin: 6px 0;
+  padding: 10px 18px;
+}
+
+.qb-delete-form {
+  margin-top: 8px;
 }
 
 .archive-filter-btn {
@@ -1384,12 +1451,30 @@ select option:checked {
   }
 
   .archive-filter-input,
+  .archive-search-wrap,
   .archive-filter-select,
   .archive-filter-select-class,
   .archive-filter-select-sort,
   .archive-filter-btn {
     width: 100%;
     min-width: 0;
+  }
+
+  .qb-col-question,
+  .qb-col-options,
+  .qb-col-answer,
+  .qb-col-marks,
+  .qb-col-actions {
+    min-width: 180px;
+  }
+
+  .qb-col-actions {
+    min-width: 140px;
+  }
+
+  .qb-action-btn {
+    width: 100%;
+    margin: 4px 0;
   }
 
   table {

@@ -6,7 +6,10 @@
 
   <form method="get" action="/archive" class="archive-filter-form">
     <div class="archive-filter-row">
-      <input name="q" placeholder="Search archived quizzes..." value="{{ q or '' }}" class="archive-filter-input">
+      <div class="archive-search-wrap">
+        <span class="archive-search-icon" aria-hidden="true"><i class="ms-Icon ms-Icon--Search fluent-icon"></i></span>
+        <input name="q" placeholder="Search archived quizzes..." value="{{ q or '' }}" class="archive-filter-input">
+      </div>
 
       <select name="class_no" class="archive-filter-select archive-filter-select-class">
         <option value="">All Classes</option>
