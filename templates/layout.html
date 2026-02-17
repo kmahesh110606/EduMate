@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}LMS{% endblock %}</title>
+    <link rel="stylesheet" href="https://res.cdn.office.net/files/fabric-cdn-prod_20221201.001/assets/icons/fabric-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -185,6 +186,7 @@
 {% endif %}
 
 <script src="{{ url_for('static', filename='js/theme_toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='js/custom_select.js') }}"></script>
 
 
 </body>

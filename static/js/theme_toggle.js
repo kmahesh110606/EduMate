@@ -7,7 +7,12 @@
 
     const toggleBtn = document.getElementById("themeToggleBtn");
     if (toggleBtn) {
-      toggleBtn.textContent = value === "dark" ? "☀" : "🌙";
+      const iconEl = toggleBtn.querySelector(".theme-toggle-icon");
+      if (iconEl) {
+        iconEl.className = value === "dark"
+          ? "ms-Icon ms-Icon--Sunny fluent-icon theme-toggle-icon"
+          : "ms-Icon ms-Icon--ClearNight fluent-icon theme-toggle-icon";
+      }
       toggleBtn.setAttribute("aria-label", value === "dark" ? "Switch to light theme" : "Switch to dark theme");
       toggleBtn.setAttribute("title", value === "dark" ? "Switch to light theme" : "Switch to dark theme");
     }

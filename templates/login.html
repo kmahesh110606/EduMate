@@ -44,30 +44,31 @@
 
 <script>
   function toggleLogin(mode) {
+    const pillToggle = document.getElementById('pillToggle');
     const emailBtn = document.getElementById('emailBtn');
     const regnoBtn = document.getElementById('regnoBtn');
     const emailField = document.getElementById('emailField');
     const regnoField = document.getElementById('regnoField');
-    const pillSlider = document.getElementById('pillSlider');
 
     if (mode === 'email') {
+      if (pillToggle) pillToggle.classList.remove('regno-active');
       emailBtn.classList.add('active');
       regnoBtn.classList.remove('active');
       emailField.style.display = 'block';
       regnoField.style.display = 'none';
-      pillSlider.style.left = '4px';
     } else {
+      if (pillToggle) pillToggle.classList.add('regno-active');
       emailBtn.classList.remove('active');
       regnoBtn.classList.add('active');
       emailField.style.display = 'none';
       regnoField.style.display = 'block';
-      pillSlider.style.left = '132px';
     }
   }
 
   // Set initial slider position
   window.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('pillSlider').style.left = '4px';
+    const pillToggle = document.getElementById('pillToggle');
+    if (pillToggle) pillToggle.classList.remove('regno-active');
   });
 </script>
 {% endblock %}
