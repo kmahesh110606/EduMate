@@ -1478,10 +1478,18 @@ select option:checked {
 .question-bank-table-wrap {
   width: 100%;
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 72vh;
+  -webkit-overflow-scrolling: touch;
 }
 
 .question-bank-table {
   width: 100%;
+  min-width: 980px;
+}
+
+.question-bank-list-card:hover {
+  transform: none;
 }
 
 .qb-col-question {
@@ -1600,6 +1608,38 @@ select option:checked {
     padding: 8px 10px;
     font-size: 0.88rem;
     min-width: 0 !important;
+  }
+
+  .question-bank-table-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 65vh;
+  }
+
+  .question-bank-table {
+    display: table;
+    min-width: 980px;
+    white-space: normal;
+  }
+
+  .question-bank-table th,
+  .question-bank-table td {
+    min-width: 120px !important;
+    white-space: normal;
+  }
+
+  .question-bank-table .qb-col-question {
+    min-width: 320px !important;
+  }
+
+  .question-bank-table .qb-col-options {
+    min-width: 280px !important;
+  }
+
+  .question-bank-table .qb-col-answer,
+  .question-bank-table .qb-col-marks,
+  .question-bank-table .qb-col-actions {
+    min-width: 160px !important;
   }
 
   details summary::before {
