@@ -1,13 +1,14 @@
 import os
 import random
 from cs50 import SQL
-from flask import Flask, render_template, request, redirect, session, flash, get_flashed_messages, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, session, flash, get_flashed_messages, send_from_directory, jsonify, send_file
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import login_required, apology
 from datetime import datetime
 import openpyxl
 import json
+from io import BytesIO
 
 
 
@@ -154,30 +155,22 @@ def delete_user():
         )
 
     user_id = session["user_id"]
-
-    # Delete dependent records first to avoid FK issues
     if user.get("role") == "faculty":
-        # Delete quiz attempts for quizzes belonging to faculty's classes
         db.execute(
             "DELETE FROM quiz_attempts WHERE quiz_id IN (SELECT q.quiz_id FROM quizzes q JOIN classrooms c ON q.class_no = c.class_no WHERE c.faculty_id = %s)",
             user_id,
         )
-        # Delete quizzes for faculty's classes
         db.execute(
             "DELETE FROM quizzes WHERE class_no IN (SELECT class_no FROM classrooms WHERE faculty_id = %s)",
             user_id,
         )
-        # Remove enrollments for faculty's classes
         db.execute(
             "DELETE FROM enrollments WHERE class_no IN (SELECT class_no FROM classrooms WHERE faculty_id = %s)",
             user_id,
         )
-        # Delete classrooms
         db.execute("DELETE FROM classrooms WHERE faculty_id = %s", user_id)
-        # If courses are faculty-owned, remove them too (prevents FK blocks)
         db.execute("DELETE FROM courses WHERE faculty_id = %s", user_id)
     else:
-        # Student: remove attempts and enrollments
         db.execute("DELETE FROM quiz_attempts WHERE student_id = %s", user_id)
         db.execute("DELETE FROM enrollments WHERE student_id = %s", user_id)
 
@@ -272,12 +265,10 @@ def join_class():
 
     class_no = request.form.get("class_no")
 
-    # Check if class exists
     existing_class = db.execute("SELECT * FROM classrooms WHERE class_no = %s", class_no)
     if len(existing_class) == 0:
         return dashboard(error="Class not found.")
 
-    # Check if already enrolled
     existing_enrollment = db.execute(
         "SELECT * FROM enrollments WHERE student_id = %s AND class_no = %s",
         session["user_id"], class_no
@@ -285,7 +276,6 @@ def join_class():
     if len(existing_enrollment) > 0:
         return dashboard(warning="Already enrolled in this class.")
 
-    # Safe to insert
     db.execute(
         "INSERT INTO enrollments (student_id, class_no) VALUES (%s, %s)",
         session["user_id"], class_no
@@ -314,7 +304,6 @@ def leave_class():
         flash("You are not enrolled in this class.", "warning")
         return redirect("/dashboard")
 
-    # Remove attempts for quizzes in this class (optional but keeps data consistent)
     db.execute(
         "DELETE FROM quiz_attempts WHERE student_id = %s AND quiz_id IN (SELECT quiz_id FROM quizzes WHERE class_no = %s)",
         session["user_id"],
@@ -350,8 +339,7 @@ def remove_student_from_class():
     if classroom_rows[0].get("faculty_id") != session["user_id"]:
         flash("Access denied.", "error")
         return redirect("/dashboard")
-
-    # Ensure student is enrolled
+    
     enrollment_rows = db.execute(
         "SELECT * FROM enrollments WHERE student_id = %s AND class_no = %s",
         student_id,
@@ -361,7 +349,6 @@ def remove_student_from_class():
         flash("Student is not enrolled in this class.", "warning")
         return redirect(f"/class/{class_no}")
 
-    # Remove student's attempts for quizzes in this class, then unenroll
     db.execute(
         "DELETE FROM quiz_attempts WHERE student_id = %s AND quiz_id IN (SELECT quiz_id FROM quizzes WHERE class_no = %s)",
         student_id,
@@ -459,7 +446,6 @@ def create_quiz(error=None, msg=None, warning=None):
         if not file.filename.endswith((".xlsx", ".xls")):
             return create_quiz(error="Invalid file format. Please upload an Excel (.xls or .xlsx) file.", msg=None, warning=None)
         try:
-            # Parse Excel
             workbook = openpyxl.load_workbook(file)
             sheet = workbook.active
 
@@ -642,6 +628,67 @@ def download_quiz_template():
         directory="static/files",
         path="quiz_template.xlsx",
         as_attachment=True
+    )
+
+
+@app.route("/download_question_bank", methods=["GET"])
+@login_required
+def download_question_bank():
+    if session.get("role") != "faculty":
+        flash("Only faculty can download question bank files.", "error")
+        return redirect("/dashboard")
+
+    course_code = (request.args.get("course_code") or "").strip()
+    if not course_code:
+        flash("Please select a course code first.", "error")
+        return redirect("/question_bank")
+
+    owned_course = db.execute(
+        "SELECT 1 FROM classrooms WHERE faculty_id = %s AND course_code = %s LIMIT 1",
+        session["user_id"],
+        course_code,
+    )
+    if not owned_course:
+        flash("Invalid course code selected.", "error")
+        return redirect("/question_bank")
+
+    rows = db.execute(
+        "SELECT question_text, option_a, option_b, option_c, option_d, marks, minus, correct_answer "
+        "FROM question_bank WHERE course_code = %s ORDER BY id ASC",
+        course_code,
+    )
+
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "Question Bank"
+
+    headers = ["Question", "A", "B", "C", "D", "Marks", "Minus", "Answer"]
+    sheet.append(headers)
+
+    for row in rows:
+        sheet.append([
+            row.get("question_text"),
+            row.get("option_a"),
+            row.get("option_b"),
+            row.get("option_c"),
+            row.get("option_d"),
+            row.get("marks"),
+            row.get("minus"),
+            row.get("correct_answer"),
+        ])
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    safe_course = course_code.replace("/", "-").replace("\\", "-").replace(" ", "_")
+    filename = f"question_bank_{safe_course}.xlsx"
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -875,8 +922,6 @@ def quiz_page(quiz_id):
                     return parsed if isinstance(parsed, list) else None
                 except Exception:
                     return None
-
-        # Legacy fallback: answer_0, answer_1, ... columns
         legacy = []
         has_any = False
         for i in range(question_count):
@@ -961,7 +1006,6 @@ def quiz_page(quiz_id):
 
             if action == "toggle_archive":
                 if quiz.get("status") == "archive":
-                    # Unarchive into a safe inactive state
                     db.execute("UPDATE quizzes SET status = %s WHERE quiz_id = %s", "stopped", quiz_id)
                     quiz = db.execute("SELECT * FROM quizzes WHERE quiz_id = %s", quiz_id)[0]
                     return render_template(
@@ -986,7 +1030,6 @@ def quiz_page(quiz_id):
                     msg="Quiz archived successfully!",
                 )
 
-            # Default: toggle live/stopped (do not allow when archived)
             if quiz.get("status") == "archive":
                 return render_template(
                     "quiz.html",
@@ -1032,7 +1075,6 @@ def quiz_page(quiz_id):
                 error="Invalid quiz status.",
             )
 
-        # Student submission
         if quiz.get("status") != "live":
             return render_template(
                 "quiz.html",
