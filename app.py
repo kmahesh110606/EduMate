@@ -887,10 +887,27 @@ def quiz_page(quiz_id):
         )
         if not rows:
             return []
-        if limit >= len(rows):
-            picked = rows
+
+        unique_rows = []
+        seen = set()
+        for r in rows:
+            key = (
+                (r.get("question_text") or "").strip().lower(),
+                (r.get("option_a") or "").strip().lower(),
+                (r.get("option_b") or "").strip().lower(),
+                (r.get("option_c") or "").strip().lower(),
+                (r.get("option_d") or "").strip().lower(),
+                (r.get("correct_answer") or "").strip().upper(),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            unique_rows.append(r)
+
+        if limit >= len(unique_rows):
+            picked = unique_rows
         else:
-            picked = random.sample(rows, limit)
+            picked = random.sample(unique_rows, limit)
         return [
             {
                 "ques_id": r.get("id"),
@@ -974,7 +991,7 @@ def quiz_page(quiz_id):
             attempt_questions = _parse_attempt_questions(attempt)
 
             if quiz_source == "bank" and attempt is None:
-                session_key = f"bank_questions_{quiz_id}"
+                session_key = f"bank_questions_{quiz_id}_{session['user_id']}"
                 sampled = session.get(session_key)
                 if not sampled:
                     course_code = quiz.get("bank_course_code")
@@ -1105,7 +1122,7 @@ def quiz_page(quiz_id):
             )
 
         if quiz_source == "bank":
-            session_key = f"bank_questions_{quiz_id}"
+            session_key = f"bank_questions_{quiz_id}_{session['user_id']}"
             questions = session.get(session_key) or []
             if not questions:
                 course_code = quiz.get("bank_course_code")
@@ -1150,7 +1167,7 @@ def quiz_page(quiz_id):
             "questions": json.dumps(questions),
         }
         if quiz_source == "bank":
-            session.pop(f"bank_questions_{quiz_id}", None)
+            session.pop(f"bank_questions_{quiz_id}_{session['user_id']}", None)
         return render_template(
             "quiz.html",
             quiz=quiz,

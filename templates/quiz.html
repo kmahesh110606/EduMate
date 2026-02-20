@@ -64,17 +64,29 @@
         <div class="card-list" style="min-width: none;">
           {% for question in questions %}
             <div class="card-item" style="min-width: -webkit-fill-available;">
-              <p><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+              <p>{{ question['ques'] }}</p>
               <p>Correct Marks: {{ question['marks'] }}</p>
               <p>Wrong Marks: {{ question['minus'] }}</p>
               <p>Options:</p> 
               <ul style="list-style-type: none; padding-left: 0;">
-                <li>A: {{question['a'] }}</li>
-                <li>B: {{question['b'] }}</li>
-                <li>C: {{question['c'] }}</li>
-                <li>D: {{question['d'] }}</li>
+                <li>{{question['a'] }}</li>
+                <li>{{question['b'] }}</li>
+                <li>{{question['c'] }}</li>
+                <li>{{question['d'] }}</li>
               </ul>
-              <p style="color: green;">Answer: {{ question['answer'] }}</p>
+              <p style="color: green;">Answer:
+                {% if question['answer'] == 'A' %}
+                  {{ question['a'] }}
+                {% elif question['answer'] == 'B' %}
+                  {{ question['b'] }}
+                {% elif question['answer'] == 'C' %}
+                  {{ question['c'] }}
+                {% elif question['answer'] == 'D' %}
+                  {{ question['d'] }}
+                {% else %}
+                  {{ question['answer'] }}
+                {% endif %}
+              </p>
             </div>
           {% endfor %}
         </div>
@@ -106,9 +118,21 @@
                 {% if score.questions_list %}
                   <div>
                     {% for question in score.questions_list %}
-                      <p><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+                      <p>{{ question['ques'] }}</p>
                       {% set selected = score.answers_list[loop.index0] if score.answers_list and score.answers_list|length > loop.index0 else '' %}
-                      <p>Selected: {{ selected if selected else 'Not Answered' }}</p>
+                      <p>Selected:
+                        {% if selected == 'A' %}
+                          {{ question['a'] }}
+                        {% elif selected == 'B' %}
+                          {{ question['b'] }}
+                        {% elif selected == 'C' %}
+                          {{ question['c'] }}
+                        {% elif selected == 'D' %}
+                          {{ question['d'] }}
+                        {% else %}
+                          Not Answered
+                        {% endif %}
+                      </p>
                     {% endfor %}
                   </div>
                 {% else %}
@@ -135,10 +159,9 @@
         <ul style="list-style-type: none; padding-left: 0;">
           {% for question in questions %}
             <li>
-              <p><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+              <p>{{ question['ques'] }}</p>
               <p>Your Answer: 
                 {% set your_answer = attempt_answers[loop.index0] if attempt_answers and attempt_answers|length > loop.index0 else '' %}
-                {{ your_answer }}: 
                 {% if your_answer == 'A' %}
                   {{ question['a'] }}
                 {% elif your_answer == 'B' %}
@@ -151,7 +174,19 @@
                   Not Answered
                 {% endif %}
               </p>
-              <p style="color: green;">Correct Answer: {{ question['answer'] }}</p>
+              <p style="color: green;">Correct Answer:
+                {% if question['answer'] == 'A' %}
+                  {{ question['a'] }}
+                {% elif question['answer'] == 'B' %}
+                  {{ question['b'] }}
+                {% elif question['answer'] == 'C' %}
+                  {{ question['c'] }}
+                {% elif question['answer'] == 'D' %}
+                  {{ question['d'] }}
+                {% else %}
+                  {{ question['answer'] }}
+                {% endif %}
+              </p>
             </li>
           {% endfor %}
         </ul>
@@ -188,21 +223,21 @@
               <div class="question-block" data-qindex="{{ loop.index0 }}" style="display:none;">
                 <div class="card-item" style="min-width: -webkit-fill-available; margin-bottom: 10px;">
                   <p><strong>Question</strong></p>
-                  <p style="margin-top: 8px;"><strong>Q{{ loop.index }}:</strong> {{ question['ques'] }}</p>
+                  <p style="margin-top: 8px;">{{ question['ques'] }}</p>
                   <input type="hidden" name="question_{{ loop.index0 }}" value="{{ question.get('ques_id', loop.index0) }}">
 
                   <div class="options" data-qindex="{{ loop.index0 }}" style="margin-top: 10px;">
                     <div class="option-row" data-option="A">
-                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="A" required> A: {{ question['a'] }}</label>
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="A" required> {{ question['a'] }}</label>
                     </div>
                     <div class="option-row" data-option="B">
-                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="B"> B: {{ question['b'] }}</label>
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="B"> {{ question['b'] }}</label>
                     </div>
                     <div class="option-row" data-option="C">
-                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="C"> C: {{ question['c'] }}</label>
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="C"> {{ question['c'] }}</label>
                     </div>
                     <div class="option-row" data-option="D">
-                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="D"> D: {{ question['d'] }}</label>
+                      <label><input type="radio" name="answer_{{ loop.index0 }}" value="D"> {{ question['d'] }}</label>
                     </div>
                   </div>
                 </div>
