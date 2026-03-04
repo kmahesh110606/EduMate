@@ -1859,8 +1859,8 @@ select option:checked {
 
   .quiz-attempt-modal-content {
     width: min(760px, calc(100vw - 28px));
-    height: min(80vh, 760px);
-    max-height: min(80vh, 760px);
+    height: auto;
+    max-height: 100%;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -1869,6 +1869,8 @@ select option:checked {
 
   #quizAttemptModal {
     z-index: 13000;
+    box-sizing: border-box;
+    padding: 96px 12px 24px;
   }
 
   .quiz-attempt-drawer-overlay {
@@ -1992,10 +1994,14 @@ select option:checked {
   }
 
   @media (max-width: 962px) {
+    #quizAttemptModal {
+      padding: 88px 10px 116px;
+    }
+
     .quiz-attempt-modal-content {
       width: calc(100vw - 18px);
-      height: calc(100vh - 128px);
-      max-height: calc(100vh - 128px);
+      height: auto;
+      max-height: 100%;
       border-radius: 18px;
     }
 
