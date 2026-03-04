@@ -862,8 +862,8 @@ a:hover {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: none;
   align-items: center;
   justify-content: center;
   z-index: 4000;
@@ -878,7 +878,24 @@ a:hover {
   border-radius: var(--radius-lg);
   padding: 44px;
   box-shadow: var(--shadow-strong);
+  backdrop-filter: var(--blur-medium);
+  -webkit-backdrop-filter: var(--blur-medium);
   animation: pop 0.35s ease;
+}
+
+[data-theme="dark"] .modal-content {
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.92), rgba(17, 24, 39, 0.86));
+  color: var(--text-dark);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .modal-content h1,
+[data-theme="dark"] .modal-content h2,
+[data-theme="dark"] .modal-content h3,
+[data-theme="dark"] .modal-content p,
+[data-theme="dark"] .modal-content label,
+[data-theme="dark"] .modal-content span {
+  color: var(--text-dark);
 }
 
 @keyframes pop {
@@ -1927,8 +1944,8 @@ select option:checked {
   @media (max-width: 962px) {
     .quiz-attempt-modal-content {
       width: calc(100vw - 18px);
-      height: 84vh;
-      max-height: 84vh;
+      height: calc(100vh - 128px);
+      max-height: calc(100vh - 128px);
       border-radius: 18px;
     }
 
