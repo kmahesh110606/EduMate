@@ -1769,25 +1769,30 @@ select option:checked {
 
   .quiz-attempt-drawer {
     position: fixed;
-    top: 24px;
-    right: 18px;
-    width: min(520px, calc(100vw - 36px));
-    height: calc(100vh - 48px);
+    top: 50%;
+    left: 50%;
+    width: min(760px, calc(100vw - 36px));
+    max-height: min(86vh, 860px);
+    height: auto;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 244, 244, 0.84));
     border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-strong);
     backdrop-filter: var(--blur-medium);
     -webkit-backdrop-filter: var(--blur-medium);
-    transform: translateX(calc(100% + 28px));
-    transition: transform 0.28s ease;
+    transform: translate(-50%, -48%) scale(0.97);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.24s ease, opacity 0.24s ease;
     display: flex;
     flex-direction: column;
     z-index: 4200;
   }
 
   .quiz-attempt-drawer.open {
-    transform: translateX(0);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .quiz-attempt-drawer-top {
@@ -1813,6 +1818,7 @@ select option:checked {
     padding: 16px 18px 20px;
     overflow-y: auto;
     overflow-x: hidden;
+    max-height: calc(86vh - 78px);
   }
 
   .quiz-attempt-panel-head {
@@ -1843,6 +1849,7 @@ select option:checked {
 
   body.drawer-open {
     overflow: hidden;
+    overflow-x: hidden;
   }
 
   [data-theme="dark"] .quiz-attempt-drawer-overlay {
@@ -1865,10 +1872,13 @@ select option:checked {
 
   @media (max-width: 962px) {
     .quiz-attempt-drawer {
-      top: 12px;
-      right: 8px;
-      width: calc(100vw - 16px);
-      height: calc(100vh - 24px);
+      width: calc(100vw - 20px);
+      max-height: 88vh;
+      border-radius: 18px;
+    }
+
+    .quiz-attempt-drawer-body {
+      max-height: calc(88vh - 78px);
     }
   }
 
