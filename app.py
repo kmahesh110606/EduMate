@@ -394,9 +394,13 @@ def create_class():
 
 @app.route("/create_quiz", methods=["GET", "POST"])
 @login_required
-def create_quiz(error=None, msg=None, warning=None):
+def create_quiz():
     if session["role"] != "faculty":
         return dashboard(error="Only faculty can create quizzes.")
+
+    def _render_create_quiz(error=None, msg=None, warning=None):
+        classes = db.execute("SELECT class_no FROM classrooms WHERE faculty_id = %s", session["user_id"])
+        return render_template("create_quiz.html", classes=classes, error=error, msg=msg, warning=warning)
     
     if request.method == "POST":
         title = request.form.get("title")
@@ -409,11 +413,11 @@ def create_quiz(error=None, msg=None, warning=None):
         file = request.files.get("file")
 
         if not title or not class_no or not total_marks or not duration:
-            return create_quiz(error="All fields are required.", msg=None, warning=None)
+            return _render_create_quiz(error="All fields are required.")
 
         class_rows = db.execute("SELECT course_code FROM classrooms WHERE class_no = %s", class_no)
         if not class_rows:
-            return create_quiz(error="Invalid class number.", msg=None, warning=None)
+            return _render_create_quiz(error="Invalid class number.")
         course_code = class_rows[0].get("course_code")
 
         if quiz_source == "bank":
@@ -422,14 +426,14 @@ def create_quiz(error=None, msg=None, warning=None):
             except Exception:
                 bank_count_int = 0
             if bank_count_int <= 0:
-                return create_quiz(error="Please enter a valid number of questions.", msg=None, warning=None)
+                return _render_create_quiz(error="Please enter a valid number of questions.")
             if not course_code:
-                return create_quiz(error="This class does not have a course code to use for the question bank.", msg=None, warning=None)
+                return _render_create_quiz(error="This class does not have a course code to use for the question bank.")
 
             available_rows = db.execute("SELECT COUNT(*) AS count FROM question_bank WHERE course_code = %s", course_code)
             available_count = available_rows[0].get("count", 0) if available_rows else 0
             if available_count < bank_count_int:
-                return create_quiz(error=f"Only {available_count} questions are available in the bank for this course.", msg=None, warning=None)
+                return _render_create_quiz(error=f"Only {available_count} questions are available in the bank for this course.")
 
             db.execute(
                 "INSERT INTO quizzes (title, class_no, total_marks, duration, data, source_type, bank_count, bank_course_code) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
@@ -445,9 +449,9 @@ def create_quiz(error=None, msg=None, warning=None):
             return dashboard(msg="Quiz created successfully.")
 
         if not file:
-            return create_quiz(error="Please upload an Excel file.", msg=None, warning=None)
+            return _render_create_quiz(error="Please upload an Excel file.")
         if not file.filename.endswith((".xlsx", ".xls")):
-            return create_quiz(error="Invalid file format. Please upload an Excel (.xls or .xlsx) file.", msg=None, warning=None)
+            return _render_create_quiz(error="Invalid file format. Please upload an Excel (.xls or .xlsx) file.")
         try:
             workbook = openpyxl.load_workbook(file)
             sheet = workbook.active
@@ -455,7 +459,7 @@ def create_quiz(error=None, msg=None, warning=None):
             headers = [cell.value for cell in sheet[1]]
             required_headers = ["Question", "A", "B", "C", "D", "Marks", "Minus", "Answer"]
             if headers != required_headers:
-                return create_quiz(error="Invalid Excel format. Download the temmplate and try again.", msg=None, warning="Download the template from the link below. <a href='/download_quiz_template'>Download Template</a>")
+                return _render_create_quiz(error="Invalid Excel format. Download the temmplate and try again.", warning="Download the template from the link below. <a href='/download_quiz_template'>Download Template</a>")
 
             questions = []
             for row in sheet.iter_rows(min_row=2, values_only=True):
@@ -505,9 +509,9 @@ def create_quiz(error=None, msg=None, warning=None):
             return dashboard(msg="Quiz created successfully.")
 
         except Exception as e:
-            return create_quiz(error=f"Error parsing file: {e}. Please ensure it follows the correct format or download the template and try again.", msg=None, warning="Download the template from the link below. <a href='/download_quiz_template'>Download Template</a>")
-    classes = db.execute("SELECT class_no FROM classrooms WHERE faculty_id = %s", session["user_id"])
-    return render_template("create_quiz.html", classes=classes)
+            return _render_create_quiz(error=f"Error parsing file: {e}. Please ensure it follows the correct format or download the template and try again.", warning="Download the template from the link below. <a href='/download_quiz_template'>Download Template</a>")
+
+    return _render_create_quiz()
 
 
 @app.route("/question_bank", methods=["GET", "POST"])

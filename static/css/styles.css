@@ -1033,6 +1033,38 @@ a:hover {
   outline: none;
 }
 
+.auth-card .text-muted {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .auth-card {
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.82), rgba(17, 24, 39, 0.78));
+}
+
+[data-theme="dark"] .auth-card h2,
+[data-theme="dark"] .auth-card p,
+[data-theme="dark"] .auth-card label,
+[data-theme="dark"] .auth-card span {
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .auth-card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .pill-toggle {
+  background: rgba(31, 41, 55, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .pill {
+  color: rgba(243, 244, 246, 0.78);
+}
+
+[data-theme="dark"] .pill.active {
+  color: #ffffff;
+}
+
 /* Mobile tweak */
 @media (max-width: 480px) {
   .pill-toggle {
@@ -1444,11 +1476,21 @@ select option:checked {
 .quiz-page .quiz-actions-row {
   margin: 6px 0 12px;
   gap: 12px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  align-items: stretch;
 }
 
 .quiz-page .quiz-actions-row form {
   margin: 0;
+  width: 100%;
+}
+
+.quiz-page .quiz-action-btn {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+  padding: 12px 18px;
 }
 
 .quiz-page .card {
@@ -1752,6 +1794,16 @@ select option:checked {
     display: none;
   }
 
+  .quiz-attempt-modal-content {
+    width: min(760px, calc(100vw - 28px));
+    height: min(80vh, 760px);
+    max-height: min(80vh, 760px);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   .quiz-attempt-drawer-overlay {
     position: fixed;
     inset: 0;
@@ -1818,7 +1870,9 @@ select option:checked {
     padding: 16px 18px 20px;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: calc(86vh - 78px);
+    flex: 1;
+    min-height: 0;
+    max-height: none;
   }
 
   .quiz-attempt-panel-head {
@@ -1871,14 +1925,15 @@ select option:checked {
   }
 
   @media (max-width: 962px) {
-    .quiz-attempt-drawer {
-      width: calc(100vw - 20px);
-      max-height: 88vh;
+    .quiz-attempt-modal-content {
+      width: calc(100vw - 18px);
+      height: 84vh;
+      max-height: 84vh;
       border-radius: 18px;
     }
 
     .quiz-attempt-drawer-body {
-      max-height: calc(88vh - 78px);
+      max-height: none;
     }
   }
 
