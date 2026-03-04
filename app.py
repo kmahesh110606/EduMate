@@ -110,10 +110,13 @@ def profile():
         email = request.form.get("email")
         reg_no = request.form.get("reg_no")
         contact = request.form.get("contact")
+        old_password = request.form.get("old_password")
         password = request.form.get("password")
 
         # Update fields
         if password:
+            if not old_password or not check_password_hash(user["hash"], old_password):
+                return render_template("profile.html", user=user, error="Old password is incorrect.")
             hash_pw = generate_password_hash(password)
             db.execute("UPDATE users SET name=%s, email=%s, reg_no=%s, contact=%s, hash=%s WHERE id=%s",
                        name, email, reg_no, contact, hash_pw, session["user_id"])
