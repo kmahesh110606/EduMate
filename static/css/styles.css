@@ -16,8 +16,8 @@
   --accent-purple: #6366f1;
   --theme-gradient: linear-gradient(135deg, var(--primary), var(--accent-purple));
   --underline-gradient: linear-gradient(90deg, var(--primary), var(--accent-purple));
-  --primary-glow: rgba(255, 206, 70, 0.45);
-  --secondary-glow: rgba(99, 102, 241, 0.35);
+  --primary-glow: rgba(255, 206, 70, 0.24);
+  --secondary-glow: rgba(99, 102, 241, 0.18);
 
   --text-dark: #0e0f11;
   --text-muted: #80776b;
@@ -257,9 +257,9 @@ button:hover,
 .btn:hover {
   transform: translateY(-2px) scale(var(--hover-scale));
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.7),
-    0 22px 55px var(--primary-glow),
-    0 10px 30px var(--secondary-glow);
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    0 12px 30px var(--primary-glow),
+    0 6px 18px var(--secondary-glow);
 }
 
 
@@ -419,6 +419,27 @@ a:hover {
   max-height: 540px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.dashboard-panel .card-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-panel .card-item {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.dashboard-panel .card-item:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+
+@media (max-width: 1240px) {
+  .dashboard-panel .card-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (min-width: 963px) {
@@ -609,6 +630,11 @@ a:hover {
 
 [data-theme="dark"] .nav-search-input::placeholder {
   color: rgba(243, 244, 246, 0.68);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: rgba(195, 200, 210, 0.82);
 }
 
 [data-theme="dark"] .nav-links li a,
@@ -866,7 +892,7 @@ a:hover {
   backdrop-filter: none;
   align-items: center;
   justify-content: center;
-  z-index: 4000;
+  z-index: 12000;
 }
 
 .modal-content {
@@ -881,6 +907,8 @@ a:hover {
   backdrop-filter: var(--blur-medium);
   -webkit-backdrop-filter: var(--blur-medium);
   animation: pop 0.35s ease;
+  position: relative;
+  z-index: 12001;
 }
 
 [data-theme="dark"] .modal-content {
@@ -1494,13 +1522,15 @@ select option:checked {
   margin: 6px 0 12px;
   gap: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+  justify-content: start;
   align-items: stretch;
 }
 
 .quiz-page .quiz-actions-row form {
   margin: 0;
   width: 100%;
+  max-width: 220px;
 }
 
 .quiz-page .quiz-action-btn {
@@ -1670,6 +1700,16 @@ select option:checked {
     max-height: 420px;
   }
 
+  .dashboard-panel .card-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .dashboard-panel .card-item {
+    min-width: 0;
+    max-width: none;
+  }
+
   .archive-filter-row {
     gap: 8px;
   }
@@ -1802,6 +1842,12 @@ select option:checked {
   }
 }
 
+@media (max-width: 620px) {
+  .dashboard-panel .card-list {
+    grid-template-columns: 1fr;
+  }
+}
+
   .quiz-view-attempt-btn {
     margin: 0;
     padding: 10px 16px;
@@ -1819,6 +1865,10 @@ select option:checked {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  #quizAttemptModal {
+    z-index: 13000;
   }
 
   .quiz-attempt-drawer-overlay {
