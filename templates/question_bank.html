@@ -21,7 +21,14 @@
 <div class="card">
   <h3>Add New Question</h3>
   <div style="margin: 8px 0 14px;">
-    <a class="btn btn-secondary" href="/download_question_bank?course_code={{ selected_course }}">Download Course Question Bank (.xlsx)</a>
+    <a class="btn btn-secondary qb-download-btn" href="/download_question_bank?course_code={{ selected_course }}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M12 3V14.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M8.5 11.5L12 15L15.5 11.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 18.5C5 17.67 5.67 17 6.5 17H17.5C18.33 17 19 17.67 19 18.5V19.5C19 20.33 18.33 21 17.5 21H6.5C5.67 21 5 20.33 5 19.5V18.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      Download Course Question Bank (.xlsx)
+    </a>
   </div>
   <form method="post" action="/question_bank">
     <input type="hidden" name="action" value="create">
